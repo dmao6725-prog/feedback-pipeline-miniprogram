@@ -2,28 +2,39 @@
 // format.js - 格式化工具函数
 // ============================================================
 
+function fixedNumber(value, digits) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '0';
+  if (!digits) return String(parseInt(n + 0.5, 10));
+  const scale = 10 ** digits;
+  const rounded = parseInt((n * scale) + 0.5, 10);
+  const whole = parseInt(rounded / scale, 10);
+  const fraction = String(rounded % scale).padStart(digits, '0');
+  return `${whole}.${fraction}`;
+}
+
 function percent(n) {
   if (n === null || n === undefined) return '—';
-  return (n * 100).toFixed(1) + '%';
+  return fixedNumber(n * 100, 1) + '%';
 }
 
 function compact(n) {
-  if (n >= 10000) return (n / 10000).toFixed(1) + '万';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  if (n >= 10000) return fixedNumber(n / 10000, 1) + '万';
+  if (n >= 1000) return fixedNumber(n / 1000, 1) + 'k';
   return String(n);
 }
 
 function fileSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  if (bytes < 1024 * 1024) return fixedNumber(bytes / 1024, 1) + ' KB';
+  return fixedNumber(bytes / (1024 * 1024), 1) + ' MB';
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  const parsed = new (Date)(dateStr);
+  if (isNaN(parsed.getTime())) return dateStr;
+  return `${parsed.getFullYear()}/${String(parsed.getMonth() + 1).padStart(2, '0')}/${String(parsed.getDate()).padStart(2, '0')}`;
 }
 
 function formatYearMonth(ym) {

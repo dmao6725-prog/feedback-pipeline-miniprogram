@@ -8,19 +8,32 @@ function topicBarColor(negativeRate) {
   return '#2563eb';
 }
 
+function roundPositive(value) {
+  return parseInt(Number(value) + 0.5, 10);
+}
+
 function formatShare(value) {
   const n = Number(value);
-  return Number.isFinite(n) ? `${Math.round(n * 100)}%` : '0%';
+  return Number.isFinite(n) ? `${roundPositive(n * 100)}%` : '0%';
+}
+
+function getMaxCount(list) {
+  let max = 1;
+  for (const item of list || []) {
+    const count = Number(item.count || 0);
+    if (count > max) max = count;
+  }
+  return max;
 }
 
 function normalizeTopics(topics) {
   const list = (topics || []).slice(0, 10);
-  const maxCount = Math.max(1, ...list.map((t) => Number(t.count || 0)));
+  const maxCount = getMaxCount(list);
   return list.map((item) => ({
     topic: item.topic,
     countText: String(item.count || 0),
     shareText: formatShare(item.share),
-    widthText: `${Math.round((Number(item.count || 0) / maxCount) * 100)}%`,
+    widthText: `${roundPositive((Number(item.count || 0) / maxCount) * 100)}%`,
     barColor: topicBarColor(item.negative_rate),
   }));
 }

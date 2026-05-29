@@ -1,43 +1,50 @@
 <!-- history.wxml — 历史记录 -->
 
-<view class="container">
+<view class="container history-page">
+  <view class="page-header">
+    <view class="page-title">历史记录</view>
+    <view class="page-desc">完成的分析会自动保存在这里，方便回看结果和导出样本</view>
+  </view>
+
   <!-- 加载 -->
-  <view class="empty-state" wx:if="{{loading}}">
-    <view class="empty-state-icon">⏳</view>
-    <view class="empty-state-title">加载中...</view>
+  <view class="panel empty-card" wx:if="{{loading}}">
+    <view class="empty-state">
+      <view class="empty-state-icon">...</view>
+      <view class="empty-state-title">加载中</view>
+    </view>
   </view>
 
   <!-- 空 -->
-  <view class="empty-state" wx:elif="{{historyList.length === 0}}">
-    <view class="empty-state-icon">📋</view>
-    <view class="empty-state-title">暂无历史记录</view>
-    <view class="empty-state-desc">完成的分析会显示在这里</view>
+  <view class="panel empty-card" wx:elif="{{historyList.length === 0}}">
+    <view class="empty-state">
+      <view class="empty-state-icon">H</view>
+      <view class="empty-state-title">暂无历史记录</view>
+      <view class="empty-state-desc">完成的分析会自动保存在这里</view>
+      <button class="btn btn-primary empty-action" bind:tap="startFirstAnalysis">开始第一次分析</button>
+    </view>
   </view>
 
   <!-- 列表 -->
   <block wx:else>
-    <view style="text-align:right;margin-bottom:12px;">
+    <view class="history-toolbar">
+      <view class="section-note">最近分析</view>
       <button class="btn btn-danger btn-sm" bind:tap="clearAll">清空全部</button>
     </view>
 
     <view class="history-item {{item.statusClass}}" wx:for="{{historyList}}" wx:key="taskId"
           bind:tap="viewDetail" data-task-id="{{item.taskId}}">
       <view class="history-header">
-        <view>
-          <text class="chip {{item.statusChipClass}}">{{item.statusText}}</text>
-        </view>
-        <text class="history-time">{{item.createdAtText}}</text>
+        <view class="history-title">{{item.fileName}}</view>
+        <text class="chip {{item.statusChipClass}}">{{item.statusText}}</text>
       </view>
+
+      <view class="history-time">{{item.createdAtText}}</view>
 
       <view class="history-body" wx:if="{{item.hasSummary}}">
         <view class="history-stats">
-          <text wx:if="{{item.hasSampleCount}}" style="font-size:12px;color:var(--color-text-secondary);">
-            {{item.sampleCountText}}
-          </text>
+          <text class="chip chip-neutral" wx:if="{{item.hasSampleCount}}">{{item.sampleCountText}}</text>
           <text class="chip chip-accent" wx:if="{{item.hasLlmStatus}}">{{item.llmStatusText}}</text>
-          <text class="chip chip-neg" wx:if="{{item.hasNegativeRate}}">
-            负面 {{item.negativeRateText}}
-          </text>
+          <text class="chip chip-neg" wx:if="{{item.hasNegativeRate}}">负面 {{item.negativeRateText}}</text>
         </view>
       </view>
 

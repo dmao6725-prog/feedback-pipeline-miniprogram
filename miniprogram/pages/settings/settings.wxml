@@ -1,9 +1,17 @@
 <!-- settings.wxml — 设置页 -->
 
-<view class="container">
+<view class="container settings-page">
+  <view class="page-header">
+    <view class="page-title">设置</view>
+    <view class="page-desc">配置默认分析模式、模型和云开发参数</view>
+  </view>
+
   <!-- 分析设置 -->
   <view class="panel">
-    <view class="panel-title">分析与处理</view>
+    <view class="panel-title">
+      <text>分析与处理</text>
+      <text class="panel-sub">默认参数</text>
+    </view>
 
     <view class="form-group">
       <view class="form-label">默认模型</view>
@@ -15,70 +23,92 @@
       </view>
     </view>
 
-    <view class="setting-row" bind:tap="toggleNoLLM">
+    <view class="setting-row mode-row" bind:tap="toggleNoLLM">
       <view class="setting-row-left">
         <view class="setting-row-title">默认仅清洗模式</view>
         <view class="setting-row-desc">开启后默认不调用 AI，仅文本清洗和统计</view>
       </view>
-      <switch checked="{{defaultNoLLM}}" color="#2563eb" />
+      <switch checked="{{defaultNoLLM}}" color="#2f6df6" />
     </view>
 
     <view class="divider"></view>
 
     <view class="form-group">
-      <view class="form-label">LLM 标注上限（10-500）</view>
+      <view class="form-label">LLM 标注上限</view>
       <input class="form-input" type="number" value="{{maxLabelRecords}}"
              bindinput="onMaxLabelInput" placeholder="200" />
-      <view class="form-hint">单次分析最多调用 LLM 标注的条数，超出部分仅统计</view>
+      <view class="form-hint">单位：条。范围 10-500，超出部分仅参与统计。</view>
     </view>
 
-    <view class="form-group">
-      <view class="form-label">LLM 并发数（1-10）</view>
+    <view class="form-group last-form-group">
+      <view class="form-label">LLM 并发数</view>
       <input class="form-input" type="number" value="{{labelConcurrency}}"
              bindinput="onConcurrencyInput" placeholder="5" />
-      <view class="form-hint">同时发起的 DeepSeek 请求数</view>
+      <view class="form-hint">单位：个请求。范围 1-10，建议保持默认值。</view>
     </view>
   </view>
 
   <!-- API Key -->
   <view class="panel">
-    <view class="panel-title">DeepSeek API Key</view>
-    <view class="setting-row" bind:tap="toggleAPIGuide">
-      <view class="setting-row-left">
-        <view class="setting-row-title">配置说明</view>
-        <view class="setting-row-desc">API Key 存储在云函数环境变量中，前端不可见</view>
-      </view>
-      <view style="font-size:14px;color:var(--color-text-tertiary);">{{showAPIGuide ? '▼' : '▶'}}</view>
+    <view class="panel-title">
+      <text>DeepSeek API Key</text>
+      <text class="panel-sub">后端环境变量</text>
     </view>
+    <view class="section-note">
+      API Key 只应配置在云函数环境变量中，前端不可见。请不要把密钥写入小程序代码。
+    </view>
+    <view class="env-list">
+      <view class="env-row">
+        <text class="env-label">DEEPSEEK_API_KEY</text>
+        <text class="chip chip-warn">必填</text>
+      </view>
+      <view class="env-row">
+        <text class="env-label">DEEPSEEK_MODEL</text>
+        <text class="chip chip-neutral">可选</text>
+      </view>
+    </view>
+
+    <view class="setting-row guide-toggle" bind:tap="toggleAPIGuide">
+      <view class="setting-row-left">
+        <view class="setting-row-title">配置步骤</view>
+        <view class="setting-row-desc">在云开发控制台为 analyzeFeedback 配置变量</view>
+      </view>
+      <view class="link-text">{{apiGuideToggleText}}</view>
+    </view>
+
     <view class="api-guide" wx:if="{{showAPIGuide}}">
       <view class="guide-step">
         <view class="guide-step-num">1</view>
-        <view class="guide-step-text">打开微信开发者工具 → 云开发控制台</view>
+        <view class="guide-step-text">打开微信开发者工具，进入云开发控制台</view>
       </view>
       <view class="guide-step">
         <view class="guide-step-num">2</view>
-        <view class="guide-step-text">选择「云函数」→ analyzeFeedback</view>
+        <view class="guide-step-text">选择云函数 analyzeFeedback</view>
       </view>
       <view class="guide-step">
         <view class="guide-step-num">3</view>
-        <view class="guide-step-text">在「环境变量」添加：DEEPSEEK_API_KEY = sk-xxxx</view>
+        <view class="guide-step-text">添加环境变量 DEEPSEEK_API_KEY = sk-xxxx</view>
       </view>
       <view class="guide-step">
         <view class="guide-step-num">4</view>
-        <view class="guide-step-text">点击「上传并部署」使环境变量生效</view>
+        <view class="guide-step-text">上传并部署云函数，让变量生效</view>
       </view>
     </view>
   </view>
 
   <!-- 云环境 -->
   <view class="panel">
-    <view class="panel-title">云开发</view>
-    <view class="setting-row">
+    <view class="panel-title">
+      <text>云开发</text>
+      <text class="chip {{cloudStatusClass}}">{{cloudStatusText}}</text>
+    </view>
+    <view class="setting-row cloud-row">
       <view class="setting-row-left">
-        <view class="setting-row-title">环境配置</view>
-        <view class="setting-row-desc">在 app.js 中修改 CLOUD_ENV_ID</view>
+        <view class="setting-row-title">CLOUD_ENV_ID</view>
+        <view class="setting-row-desc">{{cloudEnvText}}</view>
       </view>
     </view>
+    <view class="form-hint">在 miniprogram/app.js 中修改 CLOUD_ENV_ID，并部署 analyzeFeedback / getTaskResult 云函数。</view>
   </view>
 
   <!-- 关于 -->
@@ -89,7 +119,7 @@
         <view class="setting-row-title">反馈分析 · FeedbackPipeline</view>
         <view class="setting-row-desc">v1.0.0 · 从 iOS SwiftUI 迁移</view>
       </view>
-      <view style="font-size:14px;color:var(--color-text-tertiary);">›</view>
+      <view class="link-text">查看</view>
     </view>
   </view>
 

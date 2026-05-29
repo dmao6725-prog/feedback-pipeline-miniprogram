@@ -34,6 +34,39 @@ function showAnalysisError(message) {
   });
 }
 
+function normalizeFile(file) {
+  const status = file.status || 'ok';
+  return Object.assign({}, file, {
+    statusClass: status,
+    statusIcon: status === 'ok' ? 'F' : '!',
+    typeText: file.ext ? `.${file.ext.toUpperCase()}` : '未知类型',
+    metaText: status === 'ok' ? `${file.sizeText || ''} · ${file.ext ? file.ext.toUpperCase() : 'FILE'}` : '',
+  });
+}
+
+function formatFileCount(files) {
+  const count = files.length;
+  if (count === 0) return '0 个';
+  return `${count} 个`;
+}
+
+function fixedNumber(value, digits) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '0';
+  if (!digits) return String(parseInt(n + 0.5, 10));
+  const scale = 10 ** digits;
+  const rounded = parseInt((n * scale) + 0.5, 10);
+  const whole = parseInt(rounded / scale, 10);
+  const fraction = String(rounded % scale).padStart(digits, '0');
+  return `${whole}.${fraction}`;
+}
+
+function percentFromProgress(done, total) {
+  const ratio = done / (total > 0 ? total : 1);
+  const pct = 15 + parseInt((ratio * 80) + 0.5, 10);
+  return pct > 95 ? 95 : pct;
+}
+
 Page({
   data: {
     files: [],
@@ -47,6 +80,8 @@ Page({
     lastTaskId: '',
     hasValidFiles: false,
     canRun: false,
+    fileCountText: '0 个',
+    runButtonText: '请先选择文件',
   },
 
   onLoad() {
@@ -61,11 +96,17 @@ Page({
   },
 
   refreshState() {
-    const { files, isRunning } = this.data;
+    const { files, isRunning, noLLM } = this.data;
     const validCount = files.filter((f) => f.status === 'ok').length;
     this.setData({
       hasValidFiles: validCount > 0,
       canRun: !isRunning && validCount > 0,
+      fileCountText: formatFileCount(files),
+      runButtonText: isRunning
+        ? '分析中...'
+        : validCount > 0
+          ? (noLLM ? '开始清洗分析' : '开始 AI 分析')
+          : '请先选择文件',
     });
   },
 
@@ -84,24 +125,25 @@ Page({
       type: 'file',
       success: (res) => {
         const newFiles = [];
-        for (const f of res.tempFiles) {
+        for (let i = 0; i < res.tempFiles.length; i++) {
+          const f = res.tempFiles[i];
           const ext = (f.name.split('.').pop() || '').toLowerCase();
           const supported = SUPPORTED_EXTENSIONS.includes(ext);
           const sizeText = f.size < 1024
             ? `${f.size} B`
             : f.size < 1024 * 1024
-              ? `${(f.size / 1024).toFixed(1)} KB`
-              : `${(f.size / (1024 * 1024)).toFixed(1)} MB`;
-          newFiles.push({
-            id: `file_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              ? `${fixedNumber(f.size / 1024, 1)} KB`
+              : `${fixedNumber(f.size / (1024 * 1024), 1)} MB`;
+          newFiles.push(normalizeFile({
+            id: `file_${Date.now()}_${this.data.files.length}_${i}`,
             name: f.name,
             path: f.path,
             ext,
             size: f.size,
             sizeText,
             status: supported ? 'ok' : 'error',
-            error: supported ? undefined : `暂不支持 .${ext} 文件`,
-          });
+            error: supported ? undefined : '暂不支持该文件格式',
+          }));
         }
         const ok = newFiles.filter((f) => f.status === 'ok').length;
         const bad = newFiles.length - ok;
@@ -133,6 +175,7 @@ Page({
 
   toggleNoLLM() {
     this.setData({ noLLM: !this.data.noLLM });
+    this.refreshState();
   },
 
   dismissError() {
@@ -155,6 +198,7 @@ Page({
     }
 
     saveLastRunParams({ model, context: contextText, noLLM });
+    const settings = getSettings();
 
     this.setData({
       isRunning: true,
@@ -177,6 +221,8 @@ Page({
         model,
         analysisContext: contextText,
         noLLM,
+        maxLabelRecords: settings.maxLabelRecords || 200,
+        labelConcurrency: settings.labelConcurrency || 5,
       });
       taskId = submitResult.taskId;
 
@@ -188,7 +234,7 @@ Page({
           const progress = status.progress || {};
           const done = progress.label_done || 0;
           const total = progress.label_total || 100;
-          const pct = Math.min(95, 15 + Math.round((done / Math.max(total, 1)) * 80));
+          const pct = percentFromProgress(done, total);
           const msg = progress.last_message || status.status || '处理中...';
           this.setData({
             progress: pct,
@@ -204,7 +250,10 @@ Page({
       addLocalHistoryItem({
         taskId,
         status: 'completed',
-        createdAt: new Date().toISOString(),
+        createdAt: (new (Date)()).toISOString(),
+        fileName: okFiles[0].name,
+        model,
+        noLLM,
         resultSummary: {
           total: null,
           llm_enabled: !noLLM,
@@ -219,7 +268,10 @@ Page({
       addLocalHistoryItem({
         taskId: taskId || `failed_${Date.now()}`,
         status: 'failed',
-        createdAt: new Date().toISOString(),
+        createdAt: (new (Date)()).toISOString(),
+        fileName: okFiles[0] ? okFiles[0].name : '反馈分析任务',
+        model,
+        noLLM,
         error: msg,
       });
       this.setData({

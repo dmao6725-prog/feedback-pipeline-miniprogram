@@ -3,6 +3,26 @@
 
 const { getSettings, saveSettings } = require('../../utils/storage');
 
+function getCloudConfigView() {
+  const app = typeof getApp === 'function' ? getApp() : null;
+  const globalData = app && app.globalData ? app.globalData : {};
+  const envId = globalData.cloudEnvId || 'your-env-id';
+  const configured = !!envId && envId !== 'your-env-id';
+  return {
+    cloudEnvText: configured ? envId : 'your-env-id',
+    cloudStatusText: configured ? '已配置' : '未配置',
+    cloudStatusClass: configured ? 'chip-pos' : 'chip-warn',
+  };
+}
+
+function clampNumber(value, fallback, min, max) {
+  const n = parseInt(value, 10);
+  if (isNaN(n)) return fallback;
+  if (n < min) return min;
+  if (n > max) return max;
+  return n;
+}
+
 Page({
   data: {
     defaultModel: 'deepseek-v4-flash',
@@ -10,6 +30,10 @@ Page({
     maxLabelRecords: 200,
     labelConcurrency: 5,
     showAPIGuide: false,
+    apiGuideToggleText: '展开',
+    cloudEnvText: 'your-env-id',
+    cloudStatusText: '未配置',
+    cloudStatusClass: 'chip-warn',
   },
 
   onLoad() {
@@ -17,6 +41,9 @@ Page({
     this.setData({
       defaultModel: s.defaultModel || 'deepseek-v4-flash',
       defaultNoLLM: s.defaultNoLLM || false,
+      maxLabelRecords: s.maxLabelRecords || 200,
+      labelConcurrency: s.labelConcurrency || 5,
+      ...getCloudConfigView(),
     });
   },
 
@@ -40,21 +67,29 @@ Page({
 
   // ---- 标注上限 ----
   onMaxLabelInput(e) {
-    const v = parseInt(e.detail.value, 10);
-    const clamped = isNaN(v) ? 200 : Math.max(10, Math.min(500, v));
+    const clamped = clampNumber(e.detail.value, 200, 10, 500);
     this.setData({ maxLabelRecords: clamped });
+    const s = getSettings();
+    s.maxLabelRecords = clamped;
+    saveSettings(s);
   },
 
   // ---- 并发数 ----
   onConcurrencyInput(e) {
-    const v = parseInt(e.detail.value, 10);
-    const clamped = isNaN(v) ? 5 : Math.max(1, Math.min(10, v));
+    const clamped = clampNumber(e.detail.value, 5, 1, 10);
     this.setData({ labelConcurrency: clamped });
+    const s = getSettings();
+    s.labelConcurrency = clamped;
+    saveSettings(s);
   },
 
   // ---- API Key 指南 ----
   toggleAPIGuide() {
-    this.setData({ showAPIGuide: !this.data.showAPIGuide });
+    const showAPIGuide = !this.data.showAPIGuide;
+    this.setData({
+      showAPIGuide,
+      apiGuideToggleText: showAPIGuide ? '收起' : '展开',
+    });
   },
 
   // ---- 关于 ----

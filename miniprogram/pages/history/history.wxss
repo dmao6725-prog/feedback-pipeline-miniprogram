@@ -1,2 +1,24 @@
-/* history.wxss — 历史页专属样式 */
-/* 大部分样式已移至全局 components.wxss */
+/* history.wxss - empty state and history list polish */
+
+.history-page .page-header {
+  padding-bottom: 24rpx;
+}
+
+.empty-card {
+  padding: 20rpx 28rpx 34rpx;
+}
+
+.empty-action {
+  width: 100%;
+  height: 84rpx;
+  margin-top: 28rpx;
+}
+
+.history-toolbar {
+  min-height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 14rpx;
+}

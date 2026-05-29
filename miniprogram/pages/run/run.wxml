@@ -4,18 +4,18 @@
   <!-- 标题 -->
   <view class="page-header">
     <view class="page-title">反馈分析</view>
-    <view class="page-desc">导入反馈数据，通过 DeepSeek AI 进行结构化标注和分析</view>
+    <view class="page-desc">导入反馈数据，自动清洗、标注并生成分析看板</view>
   </view>
 
   <!-- 文件选择区 -->
   <view class="panel">
     <view class="panel-title">
       <text>输入文件</text>
-      <text class="panel-sub">{{files.length}} 个</text>
+      <text class="panel-sub">{{fileCountText}}</text>
     </view>
 
     <view class="upload-zone" bind:tap="chooseFile" wx:if="{{files.length === 0}}">
-      <view class="upload-zone-icon">📄</view>
+      <view class="upload-zone-icon">+</view>
       <view class="upload-zone-title">点击选择文件</view>
       <view class="upload-zone-desc">TXT · MD · CSV · TSV · JSON · JSONL · XML · HTML</view>
     </view>
@@ -23,10 +23,10 @@
     <view class="file-list" wx:if="{{files.length > 0}}">
       <view class="file-row {{item.status}}" wx:for="{{files}}" wx:key="id">
         <view class="file-row-left">
-          <view class="file-status-icon">{{item.status === 'ok' ? '📄' : '⚠️'}}</view>
+          <view class="file-status-icon">{{item.statusIcon}}</view>
           <view class="file-row-info">
             <view class="file-row-name">{{item.name}}</view>
-            <view class="file-row-meta" wx:if="{{item.status === 'ok'}}">.{{item.ext}} · {{item.sizeText}}</view>
+            <view class="file-row-meta" wx:if="{{item.status === 'ok'}}">{{item.metaText}}</view>
             <view class="file-row-error" wx:if="{{item.status === 'error'}}">{{item.error}}</view>
           </view>
         </view>
@@ -40,10 +40,7 @@
   <view class="panel">
     <view class="panel-title">
       <text>运行参数</text>
-      <button class="btn btn-primary btn-run" bind:tap="runAnalysis"
-              disabled="{{!canRun}}" loading="{{isRunning}}">
-        {{isRunning ? '分析中...' : '运行分析'}}
-      </button>
+      <text class="panel-sub">单次最多 5 个文件</text>
     </view>
 
     <view class="form-group">
@@ -69,6 +66,11 @@
       </view>
       <switch checked="{{noLLM}}" color="#2563eb" />
     </view>
+
+    <button class="btn btn-primary btn-run" bind:tap="runAnalysis"
+            disabled="{{!canRun}}" loading="{{isRunning}}">
+      {{runButtonText}}
+    </button>
   </view>
 
   <!-- 进度面板 -->
@@ -80,14 +82,14 @@
     <view class="progress-bar">
       <view class="progress-bar-fill" style="width: {{progress}}%;"></view>
     </view>
-    <view style="font-size:12px; color: var(--color-text-secondary); margin-top: 10px;">
+    <view class="progress-message">
       {{statusMessage}}
     </view>
   </view>
 
   <!-- 错误提示 -->
   <view class="panel error-panel" wx:if="{{errorMessage}}">
-    <view style="font-size: 36px; text-align: center; margin-bottom: 8px;">⚠️</view>
+    <view class="error-icon">!</view>
     <view class="error-text">{{errorMessage}}</view>
     <view style="text-align: center; margin-top: 12px;">
       <button class="btn btn-ghost btn-sm" bind:tap="dismissError">关闭</button>

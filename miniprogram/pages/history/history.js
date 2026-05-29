@@ -10,7 +10,7 @@ function hasValue(value) {
 function formatPercent(value) {
   if (!hasValue(value)) return '';
   const n = Number(value);
-  return Number.isFinite(n) ? `${Math.round(n * 100)}%` : '';
+  return Number.isFinite(n) ? `${parseInt((n * 100) + 0.5, 10)}%` : '';
 }
 
 function normalizeHistoryItem(item) {
@@ -18,17 +18,20 @@ function normalizeHistoryItem(item) {
   const status = item.status || 'failed';
   const isCompleted = status === 'completed';
   const negativeRateText = formatPercent(summary.negative_rate);
+  const fileName = item.fileName || summary.fileName || '反馈分析任务';
+  const modelText = item.noLLM || summary.no_llm ? '仅清洗' : (item.model || summary.model || 'AI 标注');
 
   return Object.assign({}, item, {
     statusClass: status,
     statusChipClass: isCompleted ? 'chip-pos' : 'chip-neg',
     statusText: isCompleted ? '已完成' : '失败',
+    fileName,
     createdAtText: item.createdAt || '',
     hasSummary: !!item.resultSummary,
     hasSampleCount: hasValue(summary.total),
     sampleCountText: hasValue(summary.total) ? `${summary.total} 条` : '',
-    hasLlmStatus: hasValue(summary.llm_enabled),
-    llmStatusText: summary.llm_enabled ? 'AI 标注' : '仅清洗',
+    hasLlmStatus: true,
+    llmStatusText: modelText,
     hasNegativeRate: !!negativeRateText,
     negativeRateText,
     canView: isCompleted,
@@ -55,6 +58,10 @@ Page({
       historyList: normalizeHistoryList(list),
       loading: false,
     });
+  },
+
+  startFirstAnalysis() {
+    wx.switchTab({ url: '/pages/run/run' });
   },
 
   viewDetail(e) {

@@ -3,3 +3,7 @@
 @import './styles/tokens.wxss';
 @import './styles/theme.wxss';
 @import './styles/components.wxss';
+
+page {
+  background: var(--fp-bg);
+}

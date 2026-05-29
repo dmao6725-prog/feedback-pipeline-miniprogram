@@ -18,16 +18,38 @@ function formatNumber(value, fallback = '0') {
   return Number.isFinite(n) ? String(n) : fallback;
 }
 
+function roundPositive(value) {
+  return parseInt(Number(value) + 0.5, 10);
+}
+
+function fixedNumber(value, digits) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '';
+  if (!digits) return String(roundPositive(n));
+  const scale = 10 ** digits;
+  const rounded = roundPositive(n * scale);
+  const whole = parseInt(rounded / scale, 10);
+  const fraction = String(rounded % scale).padStart(digits, '0');
+  return `${whole}.${fraction}`;
+}
+
+function maxCount(items) {
+  let max = 1;
+  for (const item of items || []) {
+    const count = Number(item.count || 0);
+    if (count > max) max = count;
+  }
+  return max;
+}
+
 function formatPercent(value, digits = 0) {
   if (!hasValue(value)) return '';
-  const n = Number(value);
-  return Number.isFinite(n) ? `${(n * 100).toFixed(digits)}%` : '';
+  return `${fixedNumber(Number(value) * 100, digits)}%`;
 }
 
 function formatRating(value) {
   if (!hasValue(value)) return '';
-  const n = Number(value);
-  return Number.isFinite(n) ? n.toFixed(2) : '';
+  return fixedNumber(value, 2);
 }
 
 function topicBarColor(negativeRate) {
@@ -120,12 +142,12 @@ function normalizeResult(result, expandedIds) {
   const commonRows = getCommonRows(result);
 
   const topics = result.topics || [];
-  const maxTopicCount = Math.max(1, ...topics.map((item) => Number(item.count || 0)));
+  const maxTopicCount = maxCount(topics);
   const topicsView = topics.slice(0, 10).map((item) => ({
     topic: item.topic,
     countText: formatNumber(item.count),
     shareText: formatPercent(item.share, 0),
-    widthText: `${Math.round((Number(item.count || 0) / maxTopicCount) * 100)}%`,
+    widthText: `${roundPositive((Number(item.count || 0) / maxTopicCount) * 100)}%`,
     barColor: topicBarColor(item.negative_rate),
   }));
 
@@ -134,7 +156,7 @@ function normalizeResult(result, expandedIds) {
     .filter((name) => Number(sentimentCounts[name] || 0) > 0)
     .map((name) => {
       const count = Number(sentimentCounts[name] || 0);
-      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      const pct = total > 0 ? roundPositive((count / total) * 100) : 0;
       return {
         name,
         color: sentimentColor(name),
@@ -144,11 +166,11 @@ function normalizeResult(result, expandedIds) {
     });
 
   const trend = result.trend || [];
-  const maxTrendCount = Math.max(1, ...trend.map((item) => Number(item.count || 0)));
+  const maxTrendCount = maxCount(trend);
   const trendView = trend.map((item) => ({
     yearMonth: item.year_month,
     countText: formatNumber(item.count),
-    widthText: `${Math.round((Number(item.count || 0) / maxTrendCount) * 100)}%`,
+    widthText: `${roundPositive((Number(item.count || 0) / maxTrendCount) * 100)}%`,
     hasNegativeRate: hasValue(item.negative_rate),
     negativeRateText: formatPercent(item.negative_rate, 0),
   }));

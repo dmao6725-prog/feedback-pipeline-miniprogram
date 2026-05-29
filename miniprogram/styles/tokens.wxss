@@ -1,73 +1,89 @@
 /* ============================================================
-   tokens.wxss — 跨平台设计令牌
-   保持原 iOS FeedbackPipeline 的高级分析产品气质，
-   使用实心卡片 + 边框 + 阴影模拟"轻量感"，避免 iOS 专属毛玻璃效果。
+   tokens.wxss - FeedbackPipeline mini program design tokens
+   Cross-platform Soft Surface system. No glass effects.
    ============================================================ */
 
 page {
-  /* ---- 背景层级 ---- */
-  --color-bg:              #f0f2f5;
-  --color-surface:         #ffffff;
-  --color-surface-elevated:#ffffff;
-  --color-surface-hover:   #f8f9fb;
+  --fp-bg: #f3f6fa;
+  --fp-surface: #ffffff;
+  --fp-surface-soft: #f8fafd;
+  --fp-text-primary: #111827;
+  --fp-text-secondary: #667085;
+  --fp-text-tertiary: #98a2b3;
+  --fp-border: #e4eaf2;
+  --fp-border-strong: #d7deea;
+  --fp-accent: #2f6df6;
+  --fp-accent-strong: #2458d6;
+  --fp-accent-soft: #eaf1ff;
+  --fp-success: #12b76a;
+  --fp-success-soft: #ecfdf3;
+  --fp-warning: #f79009;
+  --fp-warning-soft: #fff7e8;
+  --fp-danger: #f04438;
+  --fp-danger-soft: #fff0ef;
+  --fp-info: #6172f3;
+  --fp-info-soft: #eef4ff;
+  --fp-radius-sm: 12rpx;
+  --fp-radius-md: 20rpx;
+  --fp-radius-lg: 28rpx;
+  --fp-radius-xl: 36rpx;
+  --fp-space-xs: 8rpx;
+  --fp-space-sm: 16rpx;
+  --fp-space-md: 24rpx;
+  --fp-space-lg: 32rpx;
+  --fp-space-xl: 44rpx;
+  --fp-shadow-card: 0 10rpx 30rpx rgba(16, 24, 40, 0.08);
+  --fp-shadow-soft: 0 4rpx 16rpx rgba(16, 24, 40, 0.05);
 
-  /* ---- 文字层级 ---- */
-  --color-text-primary:    #10141a;
-  --color-text-secondary:  #4a5568;
-  --color-text-tertiary:   #8896a8;
+  /* Backward-compatible aliases for existing result/components styles. */
+  --color-bg: var(--fp-bg);
+  --color-surface: var(--fp-surface);
+  --color-surface-elevated: var(--fp-surface);
+  --color-surface-hover: var(--fp-surface-soft);
+  --color-text-primary: var(--fp-text-primary);
+  --color-text-secondary: var(--fp-text-secondary);
+  --color-text-tertiary: var(--fp-text-tertiary);
+  --color-border: var(--fp-border);
+  --color-border-light: var(--fp-border);
+  --color-accent: var(--fp-accent);
+  --color-accent-soft: var(--fp-accent-soft);
+  --color-accent-hover: var(--fp-accent-strong);
+  --color-success: var(--fp-success);
+  --color-success-soft: var(--fp-success-soft);
+  --color-warning: var(--fp-warning);
+  --color-warning-soft: var(--fp-warning-soft);
+  --color-danger: var(--fp-danger);
+  --color-danger-soft: var(--fp-danger-soft);
+  --color-info: var(--fp-info);
+  --color-info-soft: var(--fp-info-soft);
+  --radius-sm: var(--fp-radius-sm);
+  --radius-md: var(--fp-radius-md);
+  --radius-lg: var(--fp-radius-lg);
+  --radius-xl: var(--fp-radius-xl);
+  --space-xs: var(--fp-space-xs);
+  --space-sm: var(--fp-space-sm);
+  --space-md: var(--fp-space-md);
+  --space-lg: var(--fp-space-lg);
+  --space-xl: var(--fp-space-xl);
+  --space-2xl: 56rpx;
+  --shadow-card: var(--fp-shadow-card);
+  --shadow-raised: 0 14rpx 36rpx rgba(16, 24, 40, 0.12);
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 220ms ease-out;
 
-  /* ---- 边框 ---- */
-  --color-border:          #e2e6ed;
-  --color-border-light:    #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 28rpx;
+  line-height: 1.55;
+  color: var(--fp-text-primary);
+  background-color: var(--fp-bg);
+  box-sizing: border-box;
+}
 
-  /* ---- 品牌色（蓝色系，分析/数据感） ---- */
-  --color-accent:          #2563eb;
-  --color-accent-soft:     #eff4ff;
-  --color-accent-hover:    #1d4ed8;
-
-  /* ---- 语义色 ---- */
-  --color-success:         #10b981;
-  --color-success-soft:    #ecfdf5;
-  --color-warning:         #f59e0b;
-  --color-warning-soft:    #fffbeb;
-  --color-danger:          #ef4444;
-  --color-danger-soft:     #fef2f2;
-  --color-info:            #6366f1;
-  --color-info-soft:       #eef2ff;
-
-  /* ---- 圆角 ---- */
-  --radius-sm:  6px;
-  --radius-md:  10px;
-  --radius-lg:  14px;
-  --radius-xl:  20px;
-
-  /* ---- 间距 ---- */
-  --space-xs:  4px;
-  --space-sm:  8px;
-  --space-md:  12px;
-  --space-lg:  16px;
-  --space-xl:  24px;
-  --space-2xl: 32px;
-
-  /* ---- 阴影（卡片"浮起"感，替代毛玻璃） ---- */
-  --shadow-card:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-raised:0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-
-  /* ---- 字体 ---- */
-  --font-title:   600 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-body:    400 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-caption: 400 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-mono:    400 12px 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
-
-  /* ---- 过渡 ---- */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-
-  /* ---- 全局 ---- */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--color-text-primary);
-  background-color: var(--color-bg);
+view,
+text,
+input,
+button,
+textarea,
+scroll-view {
   box-sizing: border-box;
 }

@@ -2,13 +2,13 @@
 
 <!-- 加载 -->
 <view class="container" wx:if="{{loading}}">
-  <view class="empty-state"><view class="empty-state-icon">⏳</view><view class="empty-state-title">加载中...</view></view>
+  <view class="empty-state"><view class="loading-mark"></view><view class="empty-state-title">加载中...</view></view>
 </view>
 
 <!-- 错误 -->
 <view class="container" wx:elif="{{error}}">
   <view class="panel error-panel">
-    <view style="font-size:40px;text-align:center;">⚠️</view>
+    <view class="error-icon">!</view>
     <view class="error-text">{{error}}</view>
     <view style="text-align:center;margin-top:12px;">
       <button class="btn btn-ghost btn-sm" bind:tap="loadResult">重试</button>

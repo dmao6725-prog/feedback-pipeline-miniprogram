@@ -1,2 +1,24 @@
 /* result.wxss — 结果页专属样式 */
-/* 大部分样式已移至全局 theme.wxss + components.wxss */
+
+.loading-mark {
+  width: 56rpx;
+  height: 56rpx;
+  margin-bottom: 20rpx;
+  border-radius: 999rpx;
+  border: 6rpx solid var(--fp-accent-soft);
+  border-top-color: var(--fp-accent);
+}
+
+.error-icon {
+  width: 56rpx;
+  height: 56rpx;
+  margin: 0 auto 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  color: var(--fp-danger);
+  background: #ffe4e1;
+  font-size: 30rpx;
+  font-weight: 800;
+}

@@ -15,15 +15,18 @@
     </view>
 
     <view class="upload-zone" bind:tap="chooseFile" wx:if="{{files.length === 0}}">
-      <view class="upload-zone-icon">+</view>
+      <image class="upload-icon" src="/assets/icons/upload-file.png" mode="aspectFit" />
       <view class="upload-zone-title">点击选择文件</view>
-      <view class="upload-zone-desc">TXT · MD · CSV · TSV · JSON · JSONL · XML · HTML</view>
+      <view class="upload-zone-desc">TXT · MD · CSV · TSV · JSON · JSONL · XML · html</view>
     </view>
 
     <view class="file-list" wx:if="{{files.length > 0}}">
       <view class="file-row {{item.status}}" wx:for="{{files}}" wx:key="id">
         <view class="file-row-left">
-          <view class="file-status-icon">{{item.statusIcon}}</view>
+          <view class="file-status-icon">
+            <image wx:if="{{item.status === 'ok'}}" class="file-status-image" src="/assets/icons/upload-file.png" mode="aspectFit" />
+            <text wx:else>!</text>
+          </view>
           <view class="file-row-info">
             <view class="file-row-name">{{item.name}}</view>
             <view class="file-row-meta" wx:if="{{item.status === 'ok'}}">{{item.metaText}}</view>
@@ -100,7 +103,7 @@
   <view class="panel" wx:if="{{lastTaskId && !isRunning && !errorMessage}}">
     <view class="panel-title">
       <text>最近分析结果</text>
-      <navigator url="/pages/result/result?taskId={{lastTaskId}}" class="link-text">查看完整看板 ›</navigator>
+      <text class="link-text" bind:tap="viewLastResult">查看完整看板 ›</text>
     </view>
   </view>
 </view>

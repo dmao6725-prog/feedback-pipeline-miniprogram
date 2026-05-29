@@ -61,7 +61,13 @@ Page({
   },
 
   startFirstAnalysis() {
-    wx.switchTab({ url: '/pages/run/run' });
+    wx.switchTab({
+      url: '/pages/run/run',
+      fail(err) {
+        console.error('switchTab run failed', err);
+        wx.showToast({ title: '页面跳转失败', icon: 'none' });
+      },
+    });
   },
 
   viewDetail(e) {
@@ -70,7 +76,13 @@ Page({
       wx.showToast({ title: '该任务已失败，无法查看结果', icon: 'none' });
       return;
     }
-    wx.navigateTo({ url: `/pages/result/result?taskId=${taskId}` });
+    wx.navigateTo({
+      url: `/pages/result/result?taskId=${taskId}`,
+      fail(err) {
+        console.error('navigateTo result failed', err);
+        wx.showToast({ title: '页面跳转失败', icon: 'none' });
+      },
+    });
   },
 
   deleteItem(e) {

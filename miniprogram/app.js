@@ -2,6 +2,10 @@
 
 const CLOUD_ENV_ID = 'your-env-id'; // TODO: 替换为你的云开发环境 ID
 
+function isCloudConfigured() {
+  return !!CLOUD_ENV_ID && CLOUD_ENV_ID !== 'your-env-id';
+}
+
 App({
   globalData: {
     userInfo: null,
@@ -20,7 +24,7 @@ App({
       return;
     }
 
-    if (!CLOUD_ENV_ID || CLOUD_ENV_ID === 'your-env-id') {
+    if (!isCloudConfigured()) {
       console.warn('[App] 请在 miniprogram/app.js 中配置真实云环境 ID');
       return;
     }

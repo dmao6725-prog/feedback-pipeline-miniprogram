@@ -9,7 +9,7 @@
   <!-- 加载 -->
   <view class="panel empty-card" wx:if="{{loading}}">
     <view class="empty-state">
-      <view class="empty-state-icon">...</view>
+      <image class="empty-icon" src="/assets/icons/empty-history.png" mode="aspectFit" />
       <view class="empty-state-title">加载中</view>
     </view>
   </view>
@@ -17,7 +17,7 @@
   <!-- 空 -->
   <view class="panel empty-card" wx:elif="{{historyList.length === 0}}">
     <view class="empty-state">
-      <view class="empty-state-icon">H</view>
+      <image class="empty-icon" src="/assets/icons/empty-history.png" mode="aspectFit" />
       <view class="empty-state-title">暂无历史记录</view>
       <view class="empty-state-desc">完成的分析会自动保存在这里</view>
       <button class="btn btn-primary empty-action" bind:tap="startFirstAnalysis">开始第一次分析</button>

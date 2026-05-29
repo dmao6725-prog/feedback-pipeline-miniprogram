@@ -9,9 +9,16 @@
 }
 
 .empty-action {
-  width: 100%;
+  width: 320rpx;
   height: 84rpx;
   margin-top: 28rpx;
+}
+
+.empty-icon {
+  width: 160rpx;
+  height: 160rpx;
+  display: block;
+  margin: 0 auto 24rpx;
 }
 
 .history-toolbar {

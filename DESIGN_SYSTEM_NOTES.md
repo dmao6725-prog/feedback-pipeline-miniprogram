@@ -14,4 +14,8 @@ FeedbackPipeline 小程序不采用 Liquid Glass，也不使用 `backdrop-filter
 - 主按钮高度不低于 `88rpx`
 - 页面底部保留 `calc(120rpx + env(safe-area-inset-bottom))`
 - WXML 不写复杂计算，展示字符串在 JS 中提前生成
-- tabBar 暂不使用图标，避免缺失资源导致编译失败
+- tabBar 使用 `miniprogram/assets/icons/` 下的本地 PNG 图标，避免远程资源和字体图标差异
+
+## 图标规范
+
+小程序端不使用 emoji、iconfont 或远程图标。所有关键图标使用本地 PNG，保证 iOS、Android、鸿蒙和微信开发者工具一致显示。图标采用圆角线性风格，未选中灰色 `#98A2B3`，选中蓝色 `#2F6DF6`。

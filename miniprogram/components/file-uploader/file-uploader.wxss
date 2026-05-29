@@ -1,86 +1,116 @@
 /* file-uploader.wxss */
 .uploader-wrap {
-  border: 2px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 32px 16px;
+  padding: 56rpx 28rpx;
+  border: 2rpx dashed var(--fp-border-strong);
+  border-radius: var(--fp-radius-lg);
   text-align: center;
-  background: var(--color-surface-2);
+  background: var(--fp-surface-soft);
 }
 
 .upload-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+  width: 112rpx;
+  height: 112rpx;
+  display: block;
+  margin: 0 auto 20rpx;
 }
 
 .upload-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-0);
-  margin-bottom: 4px;
+  color: var(--fp-text-primary);
+  font-size: 30rpx;
+  line-height: 1.35;
+  font-weight: 700;
+  margin-bottom: 10rpx;
 }
 
 .upload-desc {
-  font-size: 10px;
+  color: var(--fp-text-tertiary);
+  font-size: 22rpx;
+  line-height: 1.45;
   font-weight: 600;
-  color: var(--color-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .file-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16rpx;
 }
 
 .file-row {
+  min-height: 92rpx;
+  padding: 18rpx 20rpx;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  gap: 18rpx;
+  border: 1rpx solid var(--fp-border);
+  border-radius: var(--fp-radius-md);
+  background: var(--fp-surface);
 }
 
 .file-row.error {
-  background: #fef2f2;
-  border-color: #fecaca;
+  border-color: #ffd0cc;
+  background: var(--fp-danger-soft);
 }
 
 .file-icon {
-  font-size: 18px;
+  width: 48rpx;
+  height: 48rpx;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  color: var(--fp-danger);
+  background: var(--fp-accent-soft);
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.file-status-image {
+  width: 34rpx;
+  height: 34rpx;
+  display: block;
 }
 
 .file-info {
-  flex: 1;
   min-width: 0;
+  flex: 1;
+  text-align: left;
 }
 
 .file-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-0);
   overflow: hidden;
+  color: var(--fp-text-primary);
+  font-size: 27rpx;
+  line-height: 1.35;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.file-meta,
+.file-error {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  line-height: 1.35;
+}
+
 .file-meta {
-  font-size: 11px;
-  color: var(--color-text-3);
-  margin-top: 2px;
+  color: var(--fp-text-tertiary);
 }
 
 .file-error {
-  font-size: 11px;
-  color: var(--color-neg);
-  margin-top: 2px;
+  color: var(--fp-danger);
 }
 
 .file-remove {
-  font-size: 13px;
-  color: var(--color-text-3);
-  padding: 4px;
+  width: 56rpx;
+  height: 56rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18rpx;
+  color: var(--fp-text-tertiary);
+  background: var(--fp-surface-soft);
+  font-size: 28rpx;
 }

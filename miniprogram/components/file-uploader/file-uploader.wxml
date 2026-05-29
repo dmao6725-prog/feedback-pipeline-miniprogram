@@ -1,13 +1,16 @@
 <!-- file-uploader.wxml -->
 <view class="uploader-wrap" bind:tap="onTap">
-  <view class="upload-icon" wx:if="{{!fileList.length}}">📄</view>
+  <image class="upload-icon" wx:if="{{!fileList.length}}" src="/assets/icons/upload-file.png" mode="aspectFit" />
   <view class="upload-title" wx:if="{{!fileList.length}}">点击选择文件</view>
-  <view class="upload-desc" wx:if="{{!fileList.length}}">TXT · MD · CSV · TSV · JSON · JSONL · XML · HTML</view>
+  <view class="upload-desc" wx:if="{{!fileList.length}}">TXT · MD · CSV · TSV · JSON · JSONL · XML · html</view>
 
   <!-- 已有文件 -->
   <view class="file-list" wx:if="{{fileList.length}}">
     <view class="file-row {{item.status}}" wx:for="{{fileList}}" wx:key="id">
-      <view class="file-icon">{{item.status === 'ok' ? '📄' : '⚠️'}}</view>
+      <view class="file-icon">
+        <image wx:if="{{item.status === 'ok'}}" class="file-status-image" src="/assets/icons/upload-file.png" mode="aspectFit" />
+        <text wx:else>!</text>
+      </view>
       <view class="file-info">
         <view class="file-name">{{item.name}}</view>
         <view class="file-meta" wx:if="{{item.status === 'ok'}}">.{{item.ext}} · {{item.sizeText}}</view>

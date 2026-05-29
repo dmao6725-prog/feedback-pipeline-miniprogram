@@ -20,6 +20,19 @@
   border-radius: 22rpx;
 }
 
+.upload-icon {
+  width: 112rpx;
+  height: 112rpx;
+  display: block;
+  margin: 0 auto 20rpx;
+}
+
+.file-status-image {
+  width: 34rpx;
+  height: 34rpx;
+  display: block;
+}
+
 .progress-message {
   margin-top: 18rpx;
   color: var(--fp-text-secondary);

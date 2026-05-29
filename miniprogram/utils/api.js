@@ -10,7 +10,7 @@ function getErrorMessage(err) {
 }
 
 function createCloudUnavailableError() {
-  return new Error('云开发不可用，请在微信开发者工具中启用云开发，并在 miniprogram/app.js 配置真实云环境 ID');
+  return new Error('云环境未配置。请先在 miniprogram/app.js 中设置真实 CLOUD_ENV_ID，并部署云函数');
 }
 
 function createCloudError(name, err) {
@@ -19,16 +19,28 @@ function createCloudError(name, err) {
   return new Error(`云函数 ${name} 调用失败，请检查云函数是否已部署、云环境 ID 是否正确`);
 }
 
-/**
- * 调用云函数（带超时保护）
- */
-function callCloudFunction(name, data = {}, timeoutMs = 60000) {
-  return new Promise((resolve, reject) => {
-    if (!wx.cloud || !wx.cloud.callFunction) {
-      reject(createCloudUnavailableError());
-      return;
-    }
+function getAppSafe() {
+  try {
+    return getApp();
+  } catch (err) {
+    return null;
+  }
+}
 
+function ensureCloudReady() {
+  if (!wx.cloud) {
+    throw new Error('当前微信版本不支持云开发，请升级微信或基础库');
+  }
+
+  const app = getAppSafe();
+  if (!app || !app.globalData || !app.globalData.cloudReady) {
+    throw createCloudUnavailableError();
+  }
+}
+
+function callFunctionWithTimeout(name, data = {}, timeoutMs = 60000) {
+  ensureCloudReady();
+  return new Promise((resolve, reject) => {
     let settled = false;
     const finish = (handler, value) => {
       if (settled) return;
@@ -54,12 +66,21 @@ function callCloudFunction(name, data = {}, timeoutMs = 60000) {
 }
 
 /**
+ * 调用云函数（带超时保护）
+ */
+function callCloudFunction(name, data = {}, timeoutMs = 60000) {
+  return callFunctionWithTimeout(name, data, timeoutMs);
+}
+
+/**
  * 上传文件到云存储
  */
 function uploadFile(filePath, cloudPath, timeoutMs = 60000) {
   return new Promise((resolve, reject) => {
-    if (!wx.cloud || !wx.cloud.uploadFile) {
-      reject(createCloudUnavailableError());
+    try {
+      ensureCloudReady();
+    } catch (err) {
+      reject(err);
       return;
     }
 
@@ -88,6 +109,13 @@ function uploadFile(filePath, cloudPath, timeoutMs = 60000) {
  */
 function getTempFileURL(fileID) {
   return new Promise((resolve, reject) => {
+    try {
+      ensureCloudReady();
+    } catch (err) {
+      reject(err);
+      return;
+    }
+
     wx.cloud.getTempFileURL({
       fileList: [fileID],
       success: (res) => resolve(res.fileList[0].tempFileURL),
@@ -152,6 +180,8 @@ function pollTaskResult(taskId, onStatus, intervalMs = 2000, maxAttempts = 300) 
 }
 
 module.exports = {
+  ensureCloudReady,
+  callFunctionWithTimeout,
   callCloudFunction,
   uploadFile,
   getTempFileURL,

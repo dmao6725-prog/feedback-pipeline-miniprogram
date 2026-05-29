@@ -124,6 +124,17 @@ Page({
     this.setData({ errorMessage: '' });
   },
 
+  viewLastResult() {
+    if (!this.data.lastTaskId) return;
+    wx.navigateTo({
+      url: `/pages/result/result?taskId=${this.data.lastTaskId}`,
+      fail(err) {
+        console.error('navigateTo result failed', err);
+        wx.showToast({ title: '页面跳转失败', icon: 'none' });
+      },
+    });
+  },
+
   // ---- 运行分析 ----
   async runAnalysis() {
     const { files, model, contextText, noLLM } = this.data;
@@ -202,7 +213,13 @@ Page({
       });
 
       // 跳转结果页
-      wx.navigateTo({ url: `/pages/result/result?taskId=${taskId}` });
+      wx.navigateTo({
+        url: `/pages/result/result?taskId=${taskId}`,
+        fail(err) {
+          console.error('navigateTo result failed', err);
+          wx.showToast({ title: '页面跳转失败', icon: 'none' });
+        },
+      });
     } catch (err: any) {
       const msg = err.message || '分析失败，请检查网络或参数后重试';
       addLocalHistoryItem({

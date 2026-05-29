@@ -5,7 +5,7 @@ interface IAppOption {
     userInfo: any;
     openid: string;
     cloudReady: boolean;
+    cloudEnvId: string;
   };
   initCloud(): void;
-  getOpenid(): void;
 }

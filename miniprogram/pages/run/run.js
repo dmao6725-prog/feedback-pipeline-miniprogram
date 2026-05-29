@@ -1,7 +1,7 @@
 // run.js - 分析页：文件选择、参数配置、启动分析、进度跟踪
 // 从 Swift HomeView.swift 迁移
 
-const { submitAnalysis, pollTaskResult, uploadFile } = require('../../utils/api');
+const { ensureCloudReady, submitAnalysis, pollTaskResult, uploadFile } = require('../../utils/api');
 const {
   addLocalHistoryItem,
   getLastRunParams,
@@ -13,16 +13,11 @@ const { SUPPORTED_EXTENSIONS } = require('../../utils/models');
 const MAX_FILE_COUNT = 5;
 
 function getCloudUnavailableMessage() {
-  if (!wx.cloud) {
-    return '云开发不可用，请在微信开发者工具中启用云开发。';
+  try {
+    ensureCloudReady();
+  } catch (err) {
+    return err && err.message ? err.message : '请先配置云环境 ID，并部署云函数';
   }
-
-  const app = typeof getApp === 'function' ? getApp() : null;
-  const globalData = app && app.globalData ? app.globalData : {};
-  if (!globalData.cloudReady) {
-    return '请先在 miniprogram/app.js 中配置真实云环境 ID，并确认云函数已部署。';
-  }
-
   return '';
 }
 
@@ -38,7 +33,6 @@ function normalizeFile(file) {
   const status = file.status || 'ok';
   return Object.assign({}, file, {
     statusClass: status,
-    statusIcon: status === 'ok' ? 'F' : '!',
     typeText: file.ext ? `.${file.ext.toUpperCase()}` : '未知类型',
     metaText: status === 'ok' ? `${file.sizeText || ''} · ${file.ext ? file.ext.toUpperCase() : 'FILE'}` : '',
   });
@@ -182,6 +176,17 @@ Page({
     this.setData({ errorMessage: '' });
   },
 
+  viewLastResult() {
+    if (!this.data.lastTaskId) return;
+    wx.navigateTo({
+      url: `/pages/result/result?taskId=${this.data.lastTaskId}`,
+      fail(err) {
+        console.error('navigateTo result failed', err);
+        wx.showToast({ title: '页面跳转失败', icon: 'none' });
+      },
+    });
+  },
+
   // ---- 运行分析 ----
   async runAnalysis() {
     const cloudMessage = getCloudUnavailableMessage();
@@ -262,7 +267,13 @@ Page({
         },
       });
 
-      wx.navigateTo({ url: `/pages/result/result?taskId=${taskId}` });
+      wx.navigateTo({
+        url: `/pages/result/result?taskId=${taskId}`,
+        fail(err) {
+          console.error('navigateTo result failed', err);
+          wx.showToast({ title: '页面跳转失败', icon: 'none' });
+        },
+      });
     } catch (err) {
       const msg = err && err.message ? err.message : '分析失败，请检查网络或参数后重试';
       addLocalHistoryItem({

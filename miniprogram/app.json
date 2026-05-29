@@ -1,9 +1,9 @@
 {
   "pages": [
     "pages/run/run",
-    "pages/result/result",
     "pages/history/history",
-    "pages/settings/settings"
+    "pages/settings/settings",
+    "pages/result/result"
   ],
   "window": {
     "navigationBarTitleText": "反馈分析",
@@ -15,19 +15,25 @@
     "color": "#98a2b3",
     "selectedColor": "#2f6df6",
     "backgroundColor": "#ffffff",
-    "borderStyle": "black",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/run/run",
-        "text": "分析"
+        "text": "分析",
+        "iconPath": "assets/icons/tab-analysis.png",
+        "selectedIconPath": "assets/icons/tab-analysis-active.png"
       },
       {
         "pagePath": "pages/history/history",
-        "text": "历史"
+        "text": "历史",
+        "iconPath": "assets/icons/tab-history.png",
+        "selectedIconPath": "assets/icons/tab-history-active.png"
       },
       {
         "pagePath": "pages/settings/settings",
-        "text": "设置"
+        "text": "设置",
+        "iconPath": "assets/icons/tab-settings.png",
+        "selectedIconPath": "assets/icons/tab-settings-active.png"
       }
     ]
   },

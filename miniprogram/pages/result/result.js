@@ -219,6 +219,7 @@ Page({
     taskId: '',
     loading: true,
     error: '',
+    emptyMessage: '',
     result: null,
 
     activeTab: 'overview',
@@ -240,14 +241,32 @@ Page({
   },
 
   onLoad(options) {
-    const taskId = options.taskId || '';
-    this.setData({ taskId });
-    if (taskId) this.loadResult();
-    else this.setData({ loading: false, error: '缺少任务 ID' });
+    const taskId = options && options.taskId ? options.taskId : '';
+    if (!taskId) {
+      this.setData({
+        taskId: '',
+        loading: false,
+        error: '',
+        emptyMessage: '暂无分析结果，请先完成一次分析',
+      });
+      return;
+    }
+
+    this.setData({ taskId, emptyMessage: '' });
+    this.loadResult();
   },
 
   async loadResult() {
-    this.setData({ loading: true, error: '' });
+    if (!this.data.taskId) {
+      this.setData({
+        loading: false,
+        error: '',
+        emptyMessage: '暂无分析结果，请先完成一次分析',
+      });
+      return;
+    }
+
+    this.setData({ loading: true, error: '', emptyMessage: '' });
     try {
       const resp = await getTaskResult(this.data.taskId);
       if (resp.result) {

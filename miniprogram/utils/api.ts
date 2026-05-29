@@ -17,14 +17,27 @@ function getAppSafe(): any {
   }
 }
 
+export function getCloudStatus(): { cloudReady: boolean; cloudEnvId: string } {
+  const app = getAppSafe();
+  const globalData = app && app.globalData ? app.globalData : {};
+  return {
+    cloudReady: !!globalData.cloudReady,
+    cloudEnvId: globalData.cloudEnvId || '',
+  };
+}
+
 export function ensureCloudReady(): void {
   if (!wx.cloud) {
-    throw new Error('当前微信版本不支持云开发，请升级微信或基础库');
+    throw new Error('当前基础库不支持云开发，请升级微信或调整调试基础库版本');
   }
 
-  const app = getAppSafe();
-  if (!app || !app.globalData || !app.globalData.cloudReady) {
-    throw new Error('云环境未配置。请先在 miniprogram/app.js 中设置真实 CLOUD_ENV_ID，并部署云函数');
+  const status = getCloudStatus();
+  if (!status.cloudEnvId || status.cloudEnvId === 'your-env-id' || status.cloudEnvId === 'CLOUD_ENV_ID') {
+    throw new Error('云环境未配置：请在 miniprogram/app.js 中设置真实 CLOUD_ENV_ID');
+  }
+
+  if (!status.cloudReady) {
+    throw new Error('云开发尚未初始化：请检查 CLOUD_ENV_ID 是否正确');
   }
 }
 
@@ -39,26 +52,42 @@ export function callFunctionWithTimeout(
   data: Record<string, any> = {},
   timeoutMs = 60000
 ): Promise<any> {
-  ensureCloudReady();
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    const finish = (handler: (value: any) => void, value: any) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      handler(value);
-    };
-    const timer = setTimeout(() => {
-      finish(reject, new Error(`云函数 ${name} 调用超时，请检查云环境 ID、云函数部署状态和网络`));
-    }, timeoutMs);
+  try {
+    ensureCloudReady();
+  } catch (err) {
+    return Promise.reject(err);
+  }
 
-    wx.cloud.callFunction({
-      name,
-      data,
-      success: (res: any) => finish(resolve, res.result),
-      fail: (err: any) => finish(reject, createCloudError(name, err)),
-    });
+  const ms = timeoutMs || 60000;
+  let timer: any = null;
+  const callPromise = new Promise((resolve, reject) => {
+    try {
+      wx.cloud.callFunction({
+        name,
+        data: data || {},
+        success: (res: any) => resolve(res.result),
+        fail: (err: any) => reject(createCloudError(name, err)),
+      });
+    } catch (err) {
+      reject(createCloudError(name, err));
+    }
   });
+  const timeoutPromise = new Promise((resolve, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`云函数 ${name} 调用超时，请检查云环境 ID、云函数部署状态和网络`));
+    }, ms);
+  });
+
+  return Promise.race([callPromise, timeoutPromise]).then(
+    (res) => {
+      if (timer) clearTimeout(timer);
+      return res;
+    },
+    (err) => {
+      if (timer) clearTimeout(timer);
+      throw err;
+    }
+  );
 }
 
 /**
@@ -76,7 +105,12 @@ export async function callCloudFunction(
  * 上传文件到云存储
  */
 export function uploadFile(filePath: string, cloudPath: string, timeoutMs = 60000): Promise<string> {
-  ensureCloudReady();
+  try {
+    ensureCloudReady();
+  } catch (err) {
+    return Promise.reject(err);
+  }
+
   return new Promise((resolve, reject) => {
     let settled = false;
     const finish = (handler: (value: any) => void, value: any) => {
@@ -89,17 +123,16 @@ export function uploadFile(filePath: string, cloudPath: string, timeoutMs = 6000
       finish(reject, new Error('文件上传超时，请检查云环境 ID 是否正确、云存储是否可用'));
     }, timeoutMs);
 
-    wx.cloud.uploadFile({
-      cloudPath,
-      filePath,
-      success: (res) => {
-        clearTimeout(timer);
-        finish(resolve, res.fileID);
-      },
-      fail: (err: any) => {
-        finish(reject, createCloudError('uploadFile', err));
-      },
-    });
+    try {
+      wx.cloud.uploadFile({
+        cloudPath,
+        filePath,
+        success: (res) => finish(resolve, res.fileID),
+        fail: (err: any) => finish(reject, createCloudError('uploadFile', err)),
+      });
+    } catch (err) {
+      finish(reject, createCloudError('uploadFile', err));
+    }
   });
 }
 
@@ -107,7 +140,12 @@ export function uploadFile(filePath: string, cloudPath: string, timeoutMs = 6000
  * 获取临时下载链接
  */
 export function getTempFileURL(fileID: string): Promise<string> {
-  ensureCloudReady();
+  try {
+    ensureCloudReady();
+  } catch (err) {
+    return Promise.reject(err);
+  }
+
   return new Promise((resolve, reject) => {
     wx.cloud.getTempFileURL({
       fileList: [fileID],

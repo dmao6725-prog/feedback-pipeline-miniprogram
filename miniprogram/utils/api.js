@@ -10,7 +10,7 @@ function getErrorMessage(err) {
 }
 
 function createCloudUnavailableError() {
-  return new Error('云环境未配置。请先在 miniprogram/app.js 中设置真实 CLOUD_ENV_ID，并部署云函数');
+  return new Error('云环境未配置：请在 miniprogram/app.js 中设置真实 CLOUD_ENV_ID');
 }
 
 function createCloudError(name, err) {
@@ -27,42 +27,67 @@ function getAppSafe() {
   }
 }
 
+function getCloudStatus() {
+  const app = getAppSafe();
+  const globalData = app && app.globalData ? app.globalData : {};
+  return {
+    cloudReady: !!globalData.cloudReady,
+    cloudEnvId: globalData.cloudEnvId || '',
+  };
+}
+
 function ensureCloudReady() {
   if (!wx.cloud) {
-    throw new Error('当前微信版本不支持云开发，请升级微信或基础库');
+    throw new Error('当前基础库不支持云开发，请升级微信或调整调试基础库版本');
   }
 
-  const app = getAppSafe();
-  if (!app || !app.globalData || !app.globalData.cloudReady) {
+  const status = getCloudStatus();
+  if (!status.cloudEnvId || status.cloudEnvId === 'your-env-id' || status.cloudEnvId === 'CLOUD_ENV_ID') {
     throw createCloudUnavailableError();
+  }
+
+  if (!status.cloudReady) {
+    throw new Error('云开发尚未初始化：请检查 CLOUD_ENV_ID 是否正确');
   }
 }
 
 function callFunctionWithTimeout(name, data = {}, timeoutMs = 60000) {
-  ensureCloudReady();
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    const finish = (handler, value) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      handler(value);
-    };
-    const timer = setTimeout(() => {
-      finish(reject, new Error(`云函数 ${name} 调用超时，请检查云函数是否已部署、云环境 ID 是否正确`));
-    }, timeoutMs);
+  try {
+    ensureCloudReady();
+  } catch (err) {
+    return Promise.reject(err);
+  }
 
-    wx.cloud.callFunction({
-      name,
-      data,
-      success: (res) => {
-        finish(resolve, res.result);
-      },
-      fail: (err) => {
-        finish(reject, createCloudError(name, err));
-      },
-    });
+  const ms = timeoutMs || 60000;
+  let timer = null;
+  const callPromise = new Promise((resolve, reject) => {
+    try {
+      wx.cloud.callFunction({
+        name,
+        data: data || {},
+        success: (res) => resolve(res.result),
+        fail: (err) => reject(createCloudError(name, err)),
+      });
+    } catch (err) {
+      reject(createCloudError(name, err));
+    }
   });
+  const timeoutPromise = new Promise((resolve, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`云函数 ${name} 调用超时，请检查云环境 ID、云函数部署状态和网络`));
+    }, ms);
+  });
+
+  return Promise.race([callPromise, timeoutPromise]).then(
+    (res) => {
+      if (timer) clearTimeout(timer);
+      return res;
+    },
+    (err) => {
+      if (timer) clearTimeout(timer);
+      throw err;
+    }
+  );
 }
 
 /**
@@ -76,14 +101,13 @@ function callCloudFunction(name, data = {}, timeoutMs = 60000) {
  * 上传文件到云存储
  */
 function uploadFile(filePath, cloudPath, timeoutMs = 60000) {
-  return new Promise((resolve, reject) => {
-    try {
-      ensureCloudReady();
-    } catch (err) {
-      reject(err);
-      return;
-    }
+  try {
+    ensureCloudReady();
+  } catch (err) {
+    return Promise.reject(err);
+  }
 
+  return new Promise((resolve, reject) => {
     let settled = false;
     const finish = (handler, value) => {
       if (settled) return;
@@ -95,12 +119,16 @@ function uploadFile(filePath, cloudPath, timeoutMs = 60000) {
       finish(reject, new Error('文件上传超时，请检查云环境 ID 是否正确、云存储是否可用'));
     }, timeoutMs);
 
-    wx.cloud.uploadFile({
-      cloudPath,
-      filePath,
-      success: (res) => finish(resolve, res.fileID),
-      fail: (err) => finish(reject, createCloudError('uploadFile', err)),
-    });
+    try {
+      wx.cloud.uploadFile({
+        cloudPath,
+        filePath,
+        success: (res) => finish(resolve, res.fileID),
+        fail: (err) => finish(reject, createCloudError('uploadFile', err)),
+      });
+    } catch (err) {
+      finish(reject, createCloudError('uploadFile', err));
+    }
   });
 }
 
@@ -108,14 +136,13 @@ function uploadFile(filePath, cloudPath, timeoutMs = 60000) {
  * 获取临时下载链接
  */
 function getTempFileURL(fileID) {
-  return new Promise((resolve, reject) => {
-    try {
-      ensureCloudReady();
-    } catch (err) {
-      reject(err);
-      return;
-    }
+  try {
+    ensureCloudReady();
+  } catch (err) {
+    return Promise.reject(err);
+  }
 
+  return new Promise((resolve, reject) => {
     wx.cloud.getTempFileURL({
       fileList: [fileID],
       success: (res) => resolve(res.fileList[0].tempFileURL),
@@ -180,6 +207,7 @@ function pollTaskResult(taskId, onStatus, intervalMs = 2000, maxAttempts = 300) 
 }
 
 module.exports = {
+  getCloudStatus,
   ensureCloudReady,
   callFunctionWithTimeout,
   callCloudFunction,

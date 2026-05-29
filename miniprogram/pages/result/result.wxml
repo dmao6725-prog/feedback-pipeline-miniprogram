@@ -5,6 +5,13 @@
   <view class="empty-state"><view class="loading-mark"></view><view class="empty-state-title">加载中...</view></view>
 </view>
 
+<!-- 空状态 -->
+<view class="container" wx:elif="{{emptyMessage}}">
+  <view class="empty-state">
+    <view class="empty-state-title">{{emptyMessage}}</view>
+  </view>
+</view>
+
 <!-- 错误 -->
 <view class="container" wx:elif="{{error}}">
   <view class="panel error-panel">

@@ -1,11 +1,28 @@
 // run.ts — 分析页：文件选择、参数配置、启动分析、进度跟踪
 // 从 Swift HomeView.swift 迁移
 
-import { submitAnalysis, pollTaskResult } from '../../utils/api';
+import { ensureCloudReady, submitAnalysis, pollTaskResult, uploadFile } from '../../utils/api';
 import { addLocalHistoryItem, getLastRunParams, saveLastRunParams, getSettings } from '../../utils/storage';
 import { SUPPORTED_EXTENSIONS } from '../../utils/models';
 
 const MAX_FILE_COUNT = 5;
+
+function getCloudUnavailableMessage(): string {
+  try {
+    ensureCloudReady();
+  } catch (err: any) {
+    return err && err.message ? err.message : '请先配置云环境 ID，并部署云函数';
+  }
+  return '';
+}
+
+function showAnalysisError(message: string): void {
+  wx.showModal({
+    title: '分析失败',
+    content: message,
+    showCancel: false,
+  });
+}
 
 interface LocalFile {
   id: string;
@@ -137,6 +154,12 @@ Page({
 
   // ---- 运行分析 ----
   async runAnalysis() {
+    const cloudMessage = getCloudUnavailableMessage();
+    if (cloudMessage) {
+      showAnalysisError(cloudMessage);
+      return;
+    }
+
     const { files, model, contextText, noLLM } = this.data;
     const okFiles = files.filter((f) => f.status === 'ok');
     if (!okFiles.length) {
@@ -159,15 +182,7 @@ Page({
       const cloudPath = `uploads/${Date.now()}_${okFiles[0].name}`;
       this.setData({ statusMessage: `上传中: ${okFiles[0].name}` });
 
-      const uploadRes: any = await new Promise((resolve, reject) => {
-        wx.cloud.uploadFile({
-          cloudPath,
-          filePath: okFiles[0].path,
-          success: resolve,
-          fail: reject,
-        });
-      });
-      const fileID = uploadRes.fileID;
+      const fileID = await uploadFile(okFiles[0].path, cloudPath);
 
       // 提交分析任务
       this.setData({ progress: 10, statusMessage: '任务已提交，等待云函数处理...' });
@@ -234,6 +249,7 @@ Page({
         statusMessage: '',
       });
       this.refreshState();
+      showAnalysisError(msg);
     }
   },
 });

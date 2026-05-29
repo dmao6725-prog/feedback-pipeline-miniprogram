@@ -1,0 +1,6 @@
+<!-- kpi-card.wxml -->
+<view class="kpi-card-wrap">
+  <view class="kpi-label">{{label}}</view>
+  <view class="kpi-value" style="color: {{accent}};">{{value}}</view>
+  <view class="kpi-sub" wx:if="{{sub}}">{{sub}}</view>
+</view>

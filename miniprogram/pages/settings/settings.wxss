@@ -1,0 +1,98 @@
+/* settings.wxss — 设置页样式 */
+
+.setting-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.form-hint {
+  font-size: 11px;
+  color: var(--color-text-3);
+  margin-top: 4px;
+}
+
+/* 行样式设置 */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.setting-row-left {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.setting-row-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-0);
+}
+
+.setting-row-desc {
+  font-size: 11px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.expand-arrow {
+  font-size: 14px;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+}
+
+/* API 配置指南 */
+.api-guide {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+}
+
+.guide-step {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.guide-step:last-child {
+  margin-bottom: 0;
+}
+
+.guide-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.guide-step-text {
+  font-size: 13px;
+  color: var(--color-text-1);
+  line-height: 1.5;
+}
+
+/* 免责声明 */
+.disclaimer {
+  text-align: center;
+  font-size: 10px;
+  color: var(--color-text-3);
+  padding: 16px;
+  line-height: 1.5;
+}

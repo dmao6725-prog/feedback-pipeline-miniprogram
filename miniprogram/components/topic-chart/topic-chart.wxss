@@ -1,0 +1,44 @@
+/* topic-chart.wxss */
+.topic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.topic-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topic-name {
+  font-size: 12px;
+  color: var(--color-text-1);
+  width: 80px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topic-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--color-surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.topic-bar {
+  height: 100%;
+  border-radius: 4px;
+  min-width: 2px;
+}
+
+.topic-counts {
+  font-size: 11px;
+  color: var(--color-text-3);
+  width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+}

@@ -1,0 +1,82 @@
+/* history.wxss — 历史记录样式 */
+
+/* 操作栏 */
+.history-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.btn-mini {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+/* 历史项卡片 */
+.history-item {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.history-item.failed {
+  border-left: 3px solid var(--color-neg);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.history-time {
+  font-size: 11px;
+  color: var(--color-text-3);
+}
+
+.history-body {
+  margin-bottom: 8px;
+}
+
+.history-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stat {
+  font-size: 12px;
+  color: var(--color-text-1);
+}
+
+.history-error {
+  font-size: 12px;
+  color: var(--color-neg);
+  background: #fef2f2;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.history-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.link-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-brand);
+}
+
+.delete-btn {
+  font-size: 12px;
+  color: var(--color-neg);
+}

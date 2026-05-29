@@ -1,0 +1,15 @@
+<!-- detail-table.wxml -->
+<scroll-view scroll-x="true" class="table-scroll">
+  <view class="table-wrap">
+    <!-- header -->
+    <view class="table-header">
+      <view class="table-cell header-cell" wx:for="{{columns}}" wx:key="*this">{{item}}</view>
+    </view>
+    <!-- rows -->
+    <view class="table-row {{item._highlight ? 'highlight' : ''}}" wx:for="{{rows}}" wx:for-item="row" wx:key="_idx" wx:for-index="idx">
+      <view class="table-cell" wx:for="{{columns}}" wx:for-item="col" wx:key="*this">
+        {{row[col] || '—'}}
+      </view>
+    </view>
+  </view>
+</scroll-view>

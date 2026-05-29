@@ -1,0 +1,55 @@
+<!-- history.wxml — 历史记录页面，从 Swift HistoryListView.swift 迁移 -->
+
+<view class="container">
+  <!-- 加载中 -->
+  <view class="empty-state" wx:if="{{loading}}">
+    <view class="empty-state-icon">⏳</view>
+    <view class="empty-state-title">加载中...</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:elif="{{historyList.length === 0}}">
+    <view class="empty-state-icon">📋</view>
+    <view class="empty-state-title">暂无历史记录</view>
+    <view class="empty-state-desc">完成的分析会显示在这里</view>
+  </view>
+
+  <!-- 历史列表 -->
+  <block wx:else>
+    <view class="history-actions">
+      <button class="btn btn-danger" bind:tap="clearAll" size="mini">清空全部</button>
+    </view>
+
+    <view class="history-item {{item.status === 'completed' ? '' : 'failed'}}"
+          wx:for="{{historyList}}" wx:key="taskId"
+          bind:tap="viewDetail" data-task-id="{{item.taskId}}">
+      <!-- 状态标签 -->
+      <view class="history-header">
+        <view class="chip {{item.status === 'completed' ? 'chip-pos' : 'chip-neg'}}">
+          {{item.status === 'completed' ? '完成' : '失败'}}
+        </view>
+        <text class="history-time">{{item.createdAt}}</text>
+      </view>
+
+      <!-- 摘要信息 -->
+      <view class="history-body" wx:if="{{item.resultSummary}}">
+        <view class="history-stats">
+          <text class="stat" wx:if="{{item.resultSummary.total !== null}}">{{item.resultSummary.total}} 条</text>
+          <text class="stat chip chip-brand" wx:if="{{item.resultSummary.llm_enabled}}">AI 已标注</text>
+          <text class="stat chip chip-neg" wx:if="{{item.resultSummary.negative_rate !== null}}">
+            负面 {{(item.resultSummary.negative_rate * 100).toFixed(0)}}%
+          </text>
+        </view>
+      </view>
+
+      <!-- 错误信息 -->
+      <view class="history-error" wx:if="{{item.error}}">{{item.error}}</view>
+
+      <!-- 操作 -->
+      <view class="history-footer">
+        <text class="link-text" wx:if="{{item.status === 'completed'}}">查看详情 ›</text>
+        <text class="delete-btn" catch:tap="deleteItem" data-task-id="{{item.taskId}}">删除</text>
+      </view>
+    </view>
+  </block>
+</view>

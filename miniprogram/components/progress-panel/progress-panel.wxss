@@ -1,0 +1,15 @@
+/* progress-panel.wxss */
+.progress-panel {
+  padding: 16px;
+}
+
+.progress-pct {
+  font-size: 12px;
+  color: var(--color-text-2);
+}
+
+.progress-msg {
+  font-size: 12px;
+  color: var(--color-text-2);
+  margin-top: 8px;
+}

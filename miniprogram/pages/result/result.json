@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "kpi-card": "/components/kpi-card/kpi-card",
+    "topic-chart": "/components/topic-chart/topic-chart",
+    "detail-table": "/components/detail-table/detail-table",
+    "filter-bar": "/components/filter-bar/filter-bar"
+  },
+  "navigationBarTitleText": "分析结果"
+}

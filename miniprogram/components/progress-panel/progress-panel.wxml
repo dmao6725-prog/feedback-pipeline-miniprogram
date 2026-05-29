@@ -1,0 +1,11 @@
+<!-- progress-panel.wxml -->
+<view class="panel progress-panel">
+  <view class="panel-title">
+    <text>运行中</text>
+    <text class="progress-pct">{{progress}}%</text>
+  </view>
+  <view class="progress-bar">
+    <view class="progress-bar-fill" style="width: {{progress}}%"></view>
+  </view>
+  <view class="progress-msg">{{message}}</view>
+</view>

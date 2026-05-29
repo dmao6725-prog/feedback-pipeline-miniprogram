@@ -1,0 +1,14 @@
+<!-- filter-bar.wxml -->
+<view class="filter-wrap">
+  <view class="filter-options">
+    <picker wx:for="{{filters}}" wx:key="key" mode="selector"
+            range="{{item.options}}" value="{{0}}"
+            bindchange="onFilterChange" data-key="{{item.key}}">
+      <view class="filter-btn">{{item.label}}：{{item.selected || '全部'}} ▼</view>
+    </picker>
+  </view>
+  <view class="filter-toggle" bind:tap="onToggle">
+    <switch checked="{{meaningfulOnly}}" color="#2563eb" style="transform: scale(0.8);" />
+    <text>仅看有核心含义/可落地性</text>
+  </view>
+</view>

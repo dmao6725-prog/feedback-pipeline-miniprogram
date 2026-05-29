@@ -1,0 +1,20 @@
+<!-- topic-chart.wxml -->
+<view class="panel">
+  <view class="panel-title" wx:if="{{title}}">
+    <text>{{title}}</text>
+    <text class="panel-sub" wx:if="{{subtitle}}">{{subtitle}}</text>
+  </view>
+  <view class="topic-list">
+    <block wx:for="{{topics}}" wx:key="topic" wx:for-index="idx">
+      <view class="topic-row" wx:if="{{idx < 10}}">
+        <view class="topic-name">{{item.topic}}</view>
+        <view class="topic-bar-wrap">
+          <view class="topic-bar"
+                style="width: {{(item.count / maxCount * 100).toFixed(0)}}%; background: {{barColor(item.negative_rate)}};">
+          </view>
+        </view>
+        <view class="topic-counts">{{item.count}} · {{(item.share * 100).toFixed(0)}}%</view>
+      </view>
+    </block>
+  </view>
+</view>

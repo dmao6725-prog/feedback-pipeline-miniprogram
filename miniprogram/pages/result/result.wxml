@@ -33,26 +33,21 @@
 
   <!-- ====== 概览 ====== -->
   <block wx:if="{{activeTab === 'overview'}}">
-    <!-- KPI -->
+    <!-- KPI 数据看板 -->
     <view class="kpi-grid">
-      <view class="kpi-card">
-        <view class="kpi-label">样本总数</view>
-        <view class="kpi-value" style="color:#2563eb;">{{result.overviewView.totalText}}</view>
-      </view>
-      <view class="kpi-card" wx:if="{{result.overviewView.hasNegativeRate}}">
-        <view class="kpi-label">负面率</view>
-        <view class="kpi-value" style="color:#ef4444;">{{result.overviewView.negativeRateText}}</view>
-        <view class="kpi-sub" wx:if="{{result.overviewView.hasNegativeCount}}">{{result.overviewView.negativeCountText}}</view>
-      </view>
-      <view class="kpi-card" wx:if="{{result.overviewView.hasHighSeverityRate}}">
-        <view class="kpi-label">高严重度</view>
-        <view class="kpi-value" style="color:#f59e0b;">{{result.overviewView.highSeverityRateText}}</view>
-        <view class="kpi-sub" wx:if="{{result.overviewView.hasHighSeverityCount}}">{{result.overviewView.highSeverityCountText}}</view>
-      </view>
-      <view class="kpi-card" wx:if="{{result.overviewView.hasAvgRating}}">
-        <view class="kpi-label">Play 平均分</view>
-        <view class="kpi-value" style="color:#6366f1;">{{result.overviewView.avgRatingText}}</view>
-      </view>
+      <block wx:for="{{result.dashboardCards}}" wx:key="key">
+        <view class="kpi-card">
+          <view class="kpi-head">
+            <view class="kpi-dot" style="background:{{item.color}};"></view>
+            <view class="kpi-label">{{item.label}}</view>
+          </view>
+          <view class="kpi-value" style="color:{{item.color}};">{{item.valueText}}</view>
+          <view class="kpi-hint">{{item.hint}}</view>
+          <view class="kpi-bar">
+            <view class="kpi-bar-fill" style="width:{{item.barWidth}}; background:{{item.color}};"></view>
+          </view>
+        </view>
+      </block>
     </view>
 
     <!-- 数据来源 -->
@@ -72,7 +67,7 @@
     <view class="panel" wx:if="{{result.hasExecutiveSummary}}">
       <view class="panel-title">
         <text>决策摘要</text>
-        <text class="chip chip-accent">AI</text>
+        <text class="chip {{result.summaryModeClass}}">{{result.summaryModeText}}</text>
       </view>
       <view style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">
         {{result.executiveSummaryText}}

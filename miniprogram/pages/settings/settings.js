@@ -3,18 +3,6 @@
 
 const { getSettings, saveSettings } = require('../../utils/storage');
 
-function getCloudConfigView() {
-  const app = typeof getApp === 'function' ? getApp() : null;
-  const globalData = app && app.globalData ? app.globalData : {};
-  const envId = globalData.cloudEnvId || 'your-env-id';
-  const configured = !!envId && envId !== 'your-env-id';
-  return {
-    cloudEnvText: configured ? envId : 'your-env-id',
-    cloudStatusText: configured ? '已配置' : '未配置',
-    cloudStatusClass: configured ? 'chip-pos' : 'chip-warn',
-  };
-}
-
 function clampNumber(value, fallback, min, max) {
   const n = parseInt(value, 10);
   if (isNaN(n)) return fallback;
@@ -29,11 +17,6 @@ Page({
     defaultNoLLM: false,
     maxLabelRecords: 200,
     labelConcurrency: 5,
-    showAPIGuide: false,
-    apiGuideToggleText: '展开',
-    cloudEnvText: 'your-env-id',
-    cloudStatusText: '未配置',
-    cloudStatusClass: 'chip-warn',
   },
 
   onLoad() {
@@ -43,7 +26,6 @@ Page({
       defaultNoLLM: s.defaultNoLLM || false,
       maxLabelRecords: s.maxLabelRecords || 200,
       labelConcurrency: s.labelConcurrency || 5,
-      ...getCloudConfigView(),
     });
   },
 
@@ -83,20 +65,11 @@ Page({
     saveSettings(s);
   },
 
-  // ---- API Key 指南 ----
-  toggleAPIGuide() {
-    const showAPIGuide = !this.data.showAPIGuide;
-    this.setData({
-      showAPIGuide,
-      apiGuideToggleText: showAPIGuide ? '收起' : '展开',
-    });
-  },
-
   // ---- 关于 ----
   showAbout() {
     wx.showModal({
       title: '反馈分析',
-      content: 'v1.0.0\n\n从 iOS FeedbackPipeline (SwiftUI) 迁移\n为微信小程序重新设计\n\nDeepSeek API Key 存储在云函数环境变量中\n不暴露给前端',
+      content: 'v1.0.0\n\n上传反馈文件，自动清洗、标注并生成分析看板。AI 分析由后端安全处理。',
       showCancel: false,
     });
   },

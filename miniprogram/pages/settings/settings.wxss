@@ -4,8 +4,7 @@
   margin-bottom: 26rpx;
 }
 
-.mode-row,
-.cloud-row {
+.mode-row {
   padding: 20rpx 22rpx;
   border: 1rpx solid var(--fp-border);
   border-radius: var(--fp-radius-md);
@@ -14,38 +13,4 @@
 
 .last-form-group {
   margin-bottom: 0;
-}
-
-.env-list {
-  margin-top: 20rpx;
-  overflow: hidden;
-  border: 1rpx solid var(--fp-border);
-  border-radius: var(--fp-radius-md);
-  background: var(--fp-surface-soft);
-}
-
-.env-row {
-  min-height: 74rpx;
-  padding: 0 20rpx;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18rpx;
-  border-bottom: 1rpx solid var(--fp-border);
-}
-
-.env-row:last-child {
-  border-bottom: 0;
-}
-
-.env-label {
-  color: var(--fp-text-primary);
-  font-size: 25rpx;
-  line-height: 1.35;
-  font-weight: 700;
-}
-
-.guide-toggle {
-  margin-top: 14rpx;
-  padding-bottom: 0;
 }

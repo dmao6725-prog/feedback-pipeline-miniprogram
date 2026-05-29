@@ -48,67 +48,15 @@
     </view>
   </view>
 
-  <!-- API Key -->
+  <!-- AI 分析 -->
   <view class="panel">
     <view class="panel-title">
-      <text>DeepSeek API Key</text>
-      <text class="panel-sub">后端环境变量</text>
+      <text>AI 分析</text>
+      <text class="chip chip-pos">已就绪</text>
     </view>
     <view class="section-note">
-      API Key 只应配置在云函数环境变量中，前端不可见。请不要把密钥写入小程序代码。
+      AI 分析由后端安全处理，你无需配置任何密钥或参数，直接上传文件即可开始分析。
     </view>
-    <view class="env-list">
-      <view class="env-row">
-        <text class="env-label">DEEPSEEK_API_KEY</text>
-        <text class="chip chip-warn">必填</text>
-      </view>
-      <view class="env-row">
-        <text class="env-label">DEEPSEEK_MODEL</text>
-        <text class="chip chip-neutral">可选</text>
-      </view>
-    </view>
-
-    <view class="setting-row guide-toggle" bind:tap="toggleAPIGuide">
-      <view class="setting-row-left">
-        <view class="setting-row-title">配置步骤</view>
-        <view class="setting-row-desc">在云开发控制台为 analyzeFeedback 配置变量</view>
-      </view>
-      <view class="link-text">{{apiGuideToggleText}}</view>
-    </view>
-
-    <view class="api-guide" wx:if="{{showAPIGuide}}">
-      <view class="guide-step">
-        <view class="guide-step-num">1</view>
-        <view class="guide-step-text">打开微信开发者工具，进入云开发控制台</view>
-      </view>
-      <view class="guide-step">
-        <view class="guide-step-num">2</view>
-        <view class="guide-step-text">选择云函数 analyzeFeedback</view>
-      </view>
-      <view class="guide-step">
-        <view class="guide-step-num">3</view>
-        <view class="guide-step-text">添加环境变量 DEEPSEEK_API_KEY = sk-xxxx</view>
-      </view>
-      <view class="guide-step">
-        <view class="guide-step-num">4</view>
-        <view class="guide-step-text">上传并部署云函数，让变量生效</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 云环境 -->
-  <view class="panel">
-    <view class="panel-title">
-      <text>云开发</text>
-      <text class="chip {{cloudStatusClass}}">{{cloudStatusText}}</text>
-    </view>
-    <view class="setting-row cloud-row">
-      <view class="setting-row-left">
-        <view class="setting-row-title">CLOUD_ENV_ID</view>
-        <view class="setting-row-desc">{{cloudEnvText}}</view>
-      </view>
-    </view>
-    <view class="form-hint">在 miniprogram/app.js 中修改 CLOUD_ENV_ID，并部署 analyzeFeedback / getTaskResult 云函数。</view>
   </view>
 
   <!-- 关于 -->
@@ -117,13 +65,9 @@
     <view class="setting-row" bind:tap="showAbout">
       <view class="setting-row-left">
         <view class="setting-row-title">反馈分析 · FeedbackPipeline</view>
-        <view class="setting-row-desc">v1.0.0 · 从 iOS SwiftUI 迁移</view>
+        <view class="setting-row-desc">v1.0.0</view>
       </view>
       <view class="link-text">查看</view>
     </view>
-  </view>
-
-  <view class="disclaimer">
-    DeepSeek API Key 只在云函数后端使用，小程序前端代码中不包含任何密钥。分析结果存储在云数据库中。
   </view>
 </view>

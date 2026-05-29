@@ -1,5 +1,74 @@
 /* result.wxss — 结果页专属样式 */
 
+/* KPI 数据看板 */
+.kpi-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-bottom: 28rpx;
+}
+
+.kpi-card {
+  box-sizing: border-box;
+  flex: 1 1 calc(50% - 10rpx);
+  min-width: calc(50% - 10rpx);
+  padding: 26rpx 24rpx;
+  border: 1rpx solid var(--fp-border);
+  border-radius: var(--fp-radius-lg);
+  background: var(--fp-surface);
+  box-shadow: var(--fp-shadow-card);
+}
+
+.kpi-head {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.kpi-dot {
+  width: 14rpx;
+  height: 14rpx;
+  flex-shrink: 0;
+  border-radius: 999rpx;
+}
+
+.kpi-label {
+  color: var(--fp-text-secondary);
+  font-size: 24rpx;
+  line-height: 1.2;
+  font-weight: 650;
+}
+
+.kpi-value {
+  font-size: 48rpx;
+  line-height: 1.1;
+  font-weight: 750;
+}
+
+.kpi-hint {
+  margin-top: 8rpx;
+  color: var(--fp-text-tertiary);
+  font-size: 22rpx;
+  line-height: 1.35;
+}
+
+.kpi-bar {
+  margin-top: 18rpx;
+  height: 10rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: #eef1f6;
+}
+
+.kpi-bar-fill {
+  height: 100%;
+  min-width: 6rpx;
+  border-radius: 999rpx;
+  transition: width var(--transition-normal);
+}
+
+
 .loading-mark {
   width: 56rpx;
   height: 56rpx;

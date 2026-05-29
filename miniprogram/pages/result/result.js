@@ -179,23 +179,64 @@ function normalizeResult(result, expandedIds) {
   const highSeverityRateText = formatPercent(overview.high_severity_rate, 1);
   const avgRatingText = formatRating(overview.play_avg_rating);
 
+  const barWidth = (value) => {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return '0%';
+    const pct = roundPositive(n * 100);
+    return `${pct > 100 ? 100 : pct}%`;
+  };
+
+  const dashboardCards = [{
+    key: 'total',
+    label: '样本总数',
+    valueText: formatNumber(overview.total),
+    hint: '本次解析反馈',
+    color: '#2563eb',
+    barWidth: '100%',
+  }];
+  if (negativeRateText) {
+    dashboardCards.push({
+      key: 'negative',
+      label: '负面率',
+      valueText: negativeRateText,
+      hint: '负向反馈占比',
+      color: '#ef4444',
+      barWidth: barWidth(overview.negative_rate),
+    });
+  }
+  if (highSeverityRateText) {
+    dashboardCards.push({
+      key: 'severity',
+      label: '高严重度',
+      valueText: highSeverityRateText,
+      hint: '高风险问题占比',
+      color: '#f59e0b',
+      barWidth: barWidth(overview.high_severity_rate),
+    });
+  }
+  if (avgRatingText) {
+    dashboardCards.push({
+      key: 'rating',
+      label: 'Play 平均分',
+      valueText: avgRatingText,
+      hint: '应用商店评分',
+      color: '#6366f1',
+      barWidth: `${roundPositive((Number(overview.play_avg_rating) / 5) * 100)}%`,
+    });
+  }
+
+  const llmEnabled = meta.llm_enabled !== undefined
+    ? !!meta.llm_enabled
+    : !!summaries.executive_summary;
+
   return Object.assign({}, result, {
     meta: Object.assign({}, meta, {
       platforms: meta.platforms || [],
     }),
-    overviewView: {
-      totalText: formatNumber(overview.total),
-      hasNegativeRate: !!negativeRateText,
-      negativeRateText,
-      hasNegativeCount: hasValue(overview.negative_count),
-      negativeCountText: `共 ${formatNumber(overview.negative_count)} 条`,
-      hasHighSeverityRate: !!highSeverityRateText,
-      highSeverityRateText,
-      hasHighSeverityCount: hasValue(overview.high_severity_count),
-      highSeverityCountText: `共 ${formatNumber(overview.high_severity_count)} 条`,
-      hasAvgRating: !!avgRatingText,
-      avgRatingText,
-    },
+    dashboardCards,
+    llmEnabled,
+    summaryModeText: llmEnabled ? 'AI' : '仅清洗',
+    summaryModeClass: llmEnabled ? 'chip-accent' : 'chip-neutral',
     executiveSummaryText: summaries.executive_summary || '',
     topicSummaryText: summaries.topic || '',
     hasExecutiveSummary: !!summaries.executive_summary,

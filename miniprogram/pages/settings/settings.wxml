@@ -1,73 +1,71 @@
-<!-- settings.wxml — 设置页面，从 Swift SettingsView.swift 迁移 -->
+<!-- settings.wxml — 设置页 -->
 
 <view class="container">
   <!-- 分析设置 -->
   <view class="panel">
     <view class="panel-title">分析与处理</view>
 
-    <!-- 模型 -->
-    <view class="setting-group">
+    <view class="form-group">
       <view class="form-label">默认模型</view>
       <view class="segmented-control">
         <view class="seg-item {{defaultModel === 'deepseek-v4-flash' ? 'active' : ''}}"
-              bind:tap="selectModel" data-model="deepseek-v4-flash">Flash (快速)</view>
+              bind:tap="selectModel" data-model="deepseek-v4-flash">Flash 快速</view>
         <view class="seg-item {{defaultModel === 'deepseek-v4-pro' ? 'active' : ''}}"
-              bind:tap="selectModel" data-model="deepseek-v4-pro">Pro (高质量)</view>
+              bind:tap="selectModel" data-model="deepseek-v4-pro">Pro 高质量</view>
       </view>
     </view>
 
-    <!-- 默认仅清洗 -->
-    <view class="setting-row">
+    <view class="setting-row" bind:tap="toggleNoLLM">
       <view class="setting-row-left">
         <view class="setting-row-title">默认仅清洗模式</view>
-        <view class="setting-row-desc">开启后默认不调用 AI，仅做文本清洗和启发式统计</view>
+        <view class="setting-row-desc">开启后默认不调用 AI，仅文本清洗和统计</view>
       </view>
-      <switch checked="{{defaultNoLLM}}" bindchange="toggleNoLLM" color="#2563eb" />
+      <switch checked="{{defaultNoLLM}}" color="#2563eb" />
     </view>
 
-    <!-- 标注上限 -->
-    <view class="setting-group">
+    <view class="divider"></view>
+
+    <view class="form-group">
       <view class="form-label">LLM 标注上限（10-500）</view>
       <input class="form-input" type="number" value="{{maxLabelRecords}}"
              bindinput="onMaxLabelInput" placeholder="200" />
-      <view class="form-hint">单次分析最多调用 LLM 标注的反馈条数，超出部分仅统计</view>
+      <view class="form-hint">单次分析最多调用 LLM 标注的条数，超出部分仅统计</view>
     </view>
 
-    <!-- 并发数 -->
-    <view class="setting-group">
+    <view class="form-group">
       <view class="form-label">LLM 并发数（1-10）</view>
       <input class="form-input" type="number" value="{{labelConcurrency}}"
              bindinput="onConcurrencyInput" placeholder="5" />
-      <view class="form-hint">同时发起 DeepSeek 请求的数量</view>
+      <view class="form-hint">同时发起的 DeepSeek 请求数</view>
     </view>
   </view>
 
-  <!-- API Key 配置说明 -->
+  <!-- API Key -->
   <view class="panel">
     <view class="panel-title">DeepSeek API Key</view>
     <view class="setting-row" bind:tap="toggleAPIGuide">
       <view class="setting-row-left">
-        <view class="setting-row-title">配置方式</view>
-        <view class="setting-row-desc">API Key 存储在云函数环境变量中</view>
+        <view class="setting-row-title">配置说明</view>
+        <view class="setting-row-desc">API Key 存储在云函数环境变量中，前端不可见</view>
       </view>
-      <view class="expand-arrow">{{showAPIGuide ? '▼' : '▶'}}</view>
+      <view style="font-size:14px;color:var(--color-text-tertiary);">{{showAPIGuide ? '▼' : '▶'}}</view>
     </view>
     <view class="api-guide" wx:if="{{showAPIGuide}}">
       <view class="guide-step">
         <view class="guide-step-num">1</view>
-        <view class="guide-step-text">在微信开发者工具中打开「云开发」控制台</view>
+        <view class="guide-step-text">打开微信开发者工具 → 云开发控制台</view>
       </view>
       <view class="guide-step">
         <view class="guide-step-num">2</view>
-        <view class="guide-step-text">选择云函数 analyzeFeedback</view>
+        <view class="guide-step-text">选择「云函数」→ analyzeFeedback</view>
       </view>
       <view class="guide-step">
         <view class="guide-step-num">3</view>
-        <view class="guide-step-text">在「环境变量」中添加 DEEPSEEK_API_KEY = sk-xxxx</view>
+        <view class="guide-step-text">在「环境变量」添加：DEEPSEEK_API_KEY = sk-xxxx</view>
       </view>
       <view class="guide-step">
         <view class="guide-step-num">4</view>
-        <view class="guide-step-text">重新部署云函数生效</view>
+        <view class="guide-step-text">点击「上传并部署」使环境变量生效</view>
       </view>
     </view>
   </view>
@@ -77,8 +75,8 @@
     <view class="panel-title">云开发</view>
     <view class="setting-row">
       <view class="setting-row-left">
-        <view class="setting-row-title">环境状态</view>
-        <view class="setting-row-desc">{{cloudEnvId}}</view>
+        <view class="setting-row-title">环境配置</view>
+        <view class="setting-row-desc">在 app.ts 中修改 CLOUD_ENV_ID</view>
       </view>
     </view>
   </view>
@@ -88,15 +86,14 @@
     <view class="panel-title">关于</view>
     <view class="setting-row" bind:tap="showAbout">
       <view class="setting-row-left">
-        <view class="setting-row-title">反馈分析</view>
-        <view class="setting-row-desc">v1.0.0 · 从 iOS FeedbackPipeline 迁移</view>
+        <view class="setting-row-title">反馈分析 · FeedbackPipeline</view>
+        <view class="setting-row-desc">v1.0.0 · 从 iOS SwiftUI 迁移</view>
       </view>
-      <view class="expand-arrow">›</view>
+      <view style="font-size:14px;color:var(--color-text-tertiary);">›</view>
     </view>
   </view>
 
-  <!-- 免责声明 -->
   <view class="disclaimer">
-    所有 DeepSeek API 调用在后端云函数执行，API Key 不会暴露给小程序前端。
+    DeepSeek API Key 只在云函数后端使用，小程序前端代码中不包含任何密钥。分析结果存储在云数据库中。
   </view>
 </view>

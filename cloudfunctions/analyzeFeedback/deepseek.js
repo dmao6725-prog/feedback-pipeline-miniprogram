@@ -35,10 +35,10 @@ async function _label(apiKey, text, model, context, topics) {
 
   const content = await chat(apiKey, {
     model: model || 'deepseek-v4-flash',
-    messages: [
+    messages: normalizeMessages([
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: prompt },
-    ],
+    ]),
     temperature: 0,
     max_tokens: 800,
     response_format: { type: 'json_object' },
@@ -54,10 +54,10 @@ async function _summarize(apiKey, records, model, context) {
 
   const content = await chat(apiKey, {
     model: model || 'deepseek-v4-flash',
-    messages: [
+    messages: normalizeMessages([
       { role: 'system', content: SUMMARY_SYSTEM_PROMPT },
       { role: 'user', content: digest },
-    ],
+    ]),
     temperature: 0.3,
     max_tokens: 1200,
   });
@@ -170,6 +170,35 @@ ${topTopics}
 
 高共鸣或代表性样本：
 ${quotes}`;
+}
+
+// ---- 消息规范化（DeepSeek 不支持 system role，合并到第一条 user） ----
+function normalizeMessages(messages) {
+  let systemContent = '';
+  const others = [];
+
+  for (const msg of messages) {
+    if (msg.role === 'system') {
+      const t = (msg.content || '').trim();
+      if (t) systemContent = systemContent ? systemContent + '\n\n' + t : t;
+    } else {
+      others.push(msg);
+    }
+  }
+
+  if (systemContent && others.length > 0) {
+    const firstUserIdx = others.findIndex((m) => m.role === 'user');
+    if (firstUserIdx >= 0) {
+      others[firstUserIdx] = {
+        ...others[firstUserIdx],
+        content: systemContent + '\n\n' + others[firstUserIdx].content,
+      };
+    } else {
+      others.unshift({ role: 'user', content: systemContent });
+    }
+  }
+
+  return others;
 }
 
 // ---- JSON 解码与 normalize ----

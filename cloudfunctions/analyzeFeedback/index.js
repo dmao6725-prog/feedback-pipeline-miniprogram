@@ -1,6 +1,5 @@
-// ============================================================
 // analyzeFeedback 云函数入口
-// ============================================================
+// 文件下载 → 解析 → LLM 标注 → 聚合 → 保存云数据库
 
 const cloud = require('wx-server-sdk');
 const pipeline = require('./pipeline');
@@ -8,15 +7,13 @@ const pipeline = require('./pipeline');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
-const _ = db.command;
 
 /**
- * 云函数主入口
- * event.fileID: 云存储文件 ID（必填）
- * event.model: DeepSeek 模型名（默认 deepseek-v4-flash）
- * event.context: 分析主题/场景
- * event.noLLM: 是否仅清洗统计
- * event.topics: 自定义议题列表
+ * event.fileID:        云存储文件 ID（必填）
+ * event.model:         DeepSeek 模型名（默认 deepseek-v4-flash）
+ * event.analysisContext: 分析主题/场景
+ * event.noLLM:         是否仅清洗统计
+ * event.topics:        自定义议题列表
  * event.maxLabelRecords: LLM 标注上限（默认 200）
  * event.labelConcurrency: LLM 并发（默认 5）
  */
@@ -55,7 +52,12 @@ exports.main = async (event, context) => {
       error: '',
       result: null,
     },
+  }).catch(() => {
+    // collection 不存在时，云开发会自动创建
   });
+
+  // 进度上报阈值跟踪（需要在此作用域声明）
+  let lastReportedFraction = 0;
 
   try {
     // 3. 下载云存储文件
@@ -63,30 +65,40 @@ exports.main = async (event, context) => {
     const downloadResult = await cloud.downloadFile({ fileID });
     const fileBuffer = downloadResult.fileContent;
 
+    if (!fileBuffer || (Buffer.isBuffer(fileBuffer) && fileBuffer.length === 0)) {
+      throw new Error('下载的文件为空');
+    }
+
     const fileName = (() => {
-      // 尝试从 fileID 中提取文件名
       const parts = fileID.split('/');
       const last = parts[parts.length - 1];
       return last || 'unknown.txt';
     })();
 
-    // 4. 解析 API Key（从云环境变量读取，优先级：环境变量 > 云数据库配置）
-    let apiKey = process.env.DEEPSEEK_API_KEY || '';
-    if (!apiKey && !noLLM) {
-      // fallback: 从云数据库 settings 读取
-      try {
-        const settingsRes = await db.collection('settings').doc('deepseek_config').get();
-        if (settingsRes.data && settingsRes.data.apiKey) {
-          apiKey = settingsRes.data.apiKey;
-        }
-      } catch (e) {
-        // settings 不存在时忽略
-      }
-    }
+    // 4. 解析 API Key
+    let apiKey = '';
+    if (!noLLM) {
+      apiKey = process.env.DEEPSEEK_API_KEY || '';
 
-    if (!noLLM && !apiKey) {
-      await updateStatus(taskId, 'failed', 0, '未配置 DeepSeek API Key，请在云环境变量或云数据库设置中配置。');
-      return errorResponse('未配置 DeepSeek API Key');
+      // fallback: 从云数据库 settings 读取
+      if (!apiKey) {
+        try {
+          const settingsRes = await db.collection('settings')
+            .doc('deepseek_config')
+            .get()
+            .catch(() => null);
+          if (settingsRes?.data?.apiKey) {
+            apiKey = settingsRes.data.apiKey;
+          }
+        } catch (_) { /* settings 不存在时忽略 */ }
+      }
+
+      if (!apiKey) {
+        await updateStatus(taskId, 'failed', 0, '未配置 DeepSeek API Key');
+        return errorResponse(
+          '未配置 DeepSeek API Key。请在云函数环境变量中设置 DEEPSEEK_API_KEY，或在云数据库 settings 集合中添加记录。'
+        );
+      }
     }
 
     // 5. 执行分析流水线
@@ -99,11 +111,10 @@ exports.main = async (event, context) => {
         context: analysisContext,
         noLLM,
         topics,
-        maxLabelRecords,
-        labelConcurrency,
+        maxLabelRecords: Math.min(Math.max(maxLabelRecords, 10), 500),
+        labelConcurrency: Math.min(Math.max(labelConcurrency, 1), 10),
       },
       (stage, fraction) => {
-        // 每 5% 或关键阶段更新进度
         if (fraction > lastReportedFraction + 0.05 || stage === 'completed') {
           lastReportedFraction = fraction;
           updateStatus(taskId, stageToStatus(stage), fraction, stage).catch(() => {});
@@ -111,18 +122,21 @@ exports.main = async (event, context) => {
       }
     );
 
-    // 6. 保存结果到数据库
-    let lastReportedFraction = 0;
+    // 6. 保存结果
     await db.collection('analysis_tasks').doc(taskId).update({
       data: {
         status: 'completed',
         updatedAt: db.serverDate(),
-        progress: { label_done: result.meta.total, label_total: result.meta.total, last_message: '处理完成' },
+        progress: {
+          label_done: result.meta.total,
+          label_total: result.meta.total,
+          last_message: '处理完成',
+        },
         result,
         resultSummary: {
           total: result.meta.total,
           llm_enabled: !noLLM,
-          platforms: result.meta.platforms,
+          platforms: result.meta.platforms || [],
           negative_rate: result.overview.negative_rate,
           high_severity_rate: result.overview.high_severity_rate,
         },
@@ -132,6 +146,7 @@ exports.main = async (event, context) => {
     return successResponse({ taskId, meta: result.meta });
   } catch (err) {
     console.error('[analyzeFeedback] Error:', err);
+
     await db.collection('analysis_tasks').doc(taskId).update({
       data: {
         status: 'failed',
@@ -139,36 +154,40 @@ exports.main = async (event, context) => {
         progress: { label_done: 0, label_total: 0, last_message: '处理失败' },
         error: err.message || '未知错误',
       },
-    });
+    }).catch(() => {});
+
     return errorResponse(err.message || '处理失败');
   }
 };
 
 // ---- 辅助函数 ----
+
 function stageToStatus(stage) {
   switch (stage) {
-    case 'readingFile': return 'parsing';
+    case 'readingFile':    return 'parsing';
     case 'extractingText': return 'cleaning';
-    case 'chunkingText': return 'cleaning';
+    case 'chunkingText':   return 'cleaning';
     case 'callingDeepSeek': return 'analyzing';
-    case 'mergingResult': return 'summarizing';
-    case 'completed': return 'completed';
-    default: return 'parsing';
+    case 'mergingResult':  return 'summarizing';
+    case 'completed':      return 'completed';
+    default:               return 'parsing';
   }
 }
 
-async function updateStatus(taskId, status, progress, message) {
+async function updateStatus(taskId, status, fraction, message) {
   try {
     await db.collection('analysis_tasks').doc(taskId).update({
       data: {
         status,
         updatedAt: db.serverDate(),
-        progress: { label_done: Math.round(progress * 100), label_total: 100, last_message: message },
+        progress: {
+          label_done: Math.round(fraction * 100),
+          label_total: 100,
+          last_message: message || status,
+        },
       },
     });
-  } catch (e) {
-    // 非关键错误，忽略
-  }
+  } catch (_) { /* 非致命错误，忽略 */ }
 }
 
 function successResponse(data) {

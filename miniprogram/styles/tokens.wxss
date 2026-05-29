@@ -1,0 +1,73 @@
+/* ============================================================
+   tokens.wxss — 跨平台设计令牌
+   保持原 iOS FeedbackPipeline 的高级分析产品气质，
+   使用实心卡片 + 边框 + 阴影模拟"轻量感"，避免 iOS 专属毛玻璃效果。
+   ============================================================ */
+
+page {
+  /* ---- 背景层级 ---- */
+  --color-bg:              #f0f2f5;
+  --color-surface:         #ffffff;
+  --color-surface-elevated:#ffffff;
+  --color-surface-hover:   #f8f9fb;
+
+  /* ---- 文字层级 ---- */
+  --color-text-primary:    #10141a;
+  --color-text-secondary:  #4a5568;
+  --color-text-tertiary:   #8896a8;
+
+  /* ---- 边框 ---- */
+  --color-border:          #e2e6ed;
+  --color-border-light:    #f0f2f5;
+
+  /* ---- 品牌色（蓝色系，分析/数据感） ---- */
+  --color-accent:          #2563eb;
+  --color-accent-soft:     #eff4ff;
+  --color-accent-hover:    #1d4ed8;
+
+  /* ---- 语义色 ---- */
+  --color-success:         #10b981;
+  --color-success-soft:    #ecfdf5;
+  --color-warning:         #f59e0b;
+  --color-warning-soft:    #fffbeb;
+  --color-danger:          #ef4444;
+  --color-danger-soft:     #fef2f2;
+  --color-info:            #6366f1;
+  --color-info-soft:       #eef2ff;
+
+  /* ---- 圆角 ---- */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+
+  /* ---- 间距 ---- */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  12px;
+  --space-lg:  16px;
+  --space-xl:  24px;
+  --space-2xl: 32px;
+
+  /* ---- 阴影（卡片"浮起"感，替代毛玻璃） ---- */
+  --shadow-card:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-raised:0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+
+  /* ---- 字体 ---- */
+  --font-title:   600 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-body:    400 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-caption: 400 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono:    400 12px 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+
+  /* ---- 过渡 ---- */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+
+  /* ---- 全局 ---- */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  box-sizing: border-box;
+}

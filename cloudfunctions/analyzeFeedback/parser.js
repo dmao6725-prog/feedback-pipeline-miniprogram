@@ -8,7 +8,7 @@
  */
 const SUPPORTED_EXTENSIONS = new Set([
   'txt', 'md', 'markdown', 'csv', 'tsv', 'json', 'jsonl', 'ndjson',
-  'xml', 'rss', 'atom', 'html', 'htm', 'xlsx', 'xls'
+  'xml', 'rss', 'atom', 'html', 'htm'
 ]);
 
 const DEFAULT_MAX_CHARS = 2400;
@@ -61,10 +61,9 @@ function parse(fileName, buffer) {
       break;
     case 'xlsx':
     case 'xls':
-      // XLSX 解析需要 xlsx 库，此处为占位；实际在云函数中动态 require
-      text = bufferToString(buffer);
-      records = chunkText(text, fileName);
-      break;
+      throw new Error('XLSX/Excel 文件暂不支持。此功能计划在后续版本中实现。建议将 Excel 导出为 CSV 后导入。');
+    case 'pdf':
+      throw new Error('PDF 文件暂不支持。此功能计划在后续版本中实现。建议将 PDF 内容复制到 TXT 文件后导入。');
     default:
       text = bufferToString(buffer);
       records = chunkText(text, fileName);

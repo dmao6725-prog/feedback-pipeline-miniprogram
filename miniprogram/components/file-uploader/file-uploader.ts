@@ -1,18 +1,9 @@
 // file-uploader.ts
-import { fileSize } from '../../utils/format';
-
 Component({
   properties: {
-    fileList: {
-      type: Array,
-      value: [],
-    },
-    maxCount: {
-      type: Number,
-      value: 5,
-    },
+    fileList: { type: Array, value: [] },
+    maxCount: { type: Number, value: 5 },
   },
-
   methods: {
     onTap() {
       this.triggerEvent('choose');

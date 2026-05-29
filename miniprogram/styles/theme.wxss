@@ -1,0 +1,263 @@
+/* ============================================================
+   theme.wxss — 全局主题与实用类
+   ============================================================ */
+
+/* ---- 容器 ---- */
+.container {
+  padding: var(--space-lg);
+  min-height: 100vh;
+}
+
+/* ---- 面板卡片（模拟"轻量浮起"感，不用毛玻璃） ---- */
+.panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  box-shadow: var(--shadow-card);
+  border: 0.5px solid var(--color-border-light);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.panel-sub {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+}
+
+/* ---- KPI 数字卡片 ---- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: var(--space-md);
+}
+
+.kpi-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  border: 0.5px solid var(--color-border-light);
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 4px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* ---- Chip 标签 ---- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.chip-info    { background: var(--color-info-soft);    color: var(--color-info); }
+.chip-pos     { background: var(--color-success-soft); color: var(--color-success); }
+.chip-neg     { background: var(--color-danger-soft);  color: var(--color-danger); }
+.chip-warn    { background: var(--color-warning-soft); color: var(--color-warning); }
+.chip-neutral { background: #f3f4f6; color: var(--color-text-tertiary); }
+.chip-brand   { background: var(--color-accent-soft);  color: var(--color-accent); }
+.chip-accent  { background: var(--color-accent-soft);  color: var(--color-accent); }
+
+/* ---- 按钮系统 ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  outline: none;
+  transition: opacity var(--transition-fast);
+  line-height: 1.2;
+}
+
+.btn::after { border: none; } /* 去掉小程序默认边框 */
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-accent), #3b82f6);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+}
+
+.btn-primary[disabled] {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.btn-ghost {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+/* ---- 表单 ---- */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-soft);
+}
+
+.form-hint {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: 4px;
+}
+
+/* ---- 分段控件 ---- */
+.segmented-control {
+  display: flex;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.seg-item {
+  flex: 1;
+  text-align: center;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.seg-item.active {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* ---- 进度条 ---- */
+.progress-bar {
+  height: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border-light);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--color-accent), #3b82f6);
+  transition: width 0.3s ease;
+}
+
+/* ---- 空状态 ---- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px var(--space-xl);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-md);
+  opacity: 0.7;
+}
+
+.empty-state-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.empty-state-desc {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  max-width: 260px;
+}
+
+/* ---- 链接文字 ---- */
+.link-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+/* ---- 分割线 ---- */
+.divider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: var(--space-md) 0;
+}
+
+/* ---- 响应式安全区 ---- */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}

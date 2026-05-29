@@ -3,18 +3,20 @@ Component({
   properties: {
     title: { type: String, value: '议题分布' },
     subtitle: { type: String, value: '' },
-    topics: {
-      type: Array,
-      value: [],
+    topics: { type: Array, value: [] as any[] },
+  },
+
+  observers: {
+    'topics': function(topics: any[]) {
+      if (topics && topics.length > 0) {
+        const maxCount = Math.max(...topics.map((t: any) => t.count || 0));
+        this.setData({ maxCount: maxCount || 1 });
+      }
     },
   },
 
-  computed: {
-    maxCount(): number {
-      const topics = this.data.topics as any[];
-      if (!topics || !topics.length) return 1;
-      return Math.max(...topics.map((t: any) => t.count));
-    },
+  data: {
+    maxCount: 1 as number,
   },
 
   methods: {

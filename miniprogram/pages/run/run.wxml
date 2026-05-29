@@ -1,110 +1,104 @@
-<!-- 首页：选择文件、配置参数、启动分析 -->
+<!-- run.wxml — 分析页：文件选择、参数配置、启动分析 -->
+
 <view class="container">
+  <!-- 标题 -->
+  <view class="page-header">
+    <view class="page-title">反馈分析</view>
+    <view class="page-desc">导入反馈数据，通过 DeepSeek AI 进行结构化标注和分析</view>
+  </view>
+
   <!-- 文件选择区 -->
   <view class="panel">
     <view class="panel-title">
       <text>输入文件</text>
-      <text class="file-count">{{files.length}} 个</text>
+      <text class="panel-sub">{{files.length}} 个</text>
     </view>
-    <!-- 上传区域 -->
+
     <view class="upload-zone" bind:tap="chooseFile" wx:if="{{files.length === 0}}">
       <view class="upload-zone-icon">📄</view>
       <view class="upload-zone-title">点击选择文件</view>
       <view class="upload-zone-desc">TXT · MD · CSV · TSV · JSON · JSONL · XML · HTML</view>
     </view>
-    <!-- 已选文件列表 -->
+
     <view class="file-list" wx:if="{{files.length > 0}}">
       <view class="file-row {{item.status}}" wx:for="{{files}}" wx:key="id">
         <view class="file-row-left">
           <view class="file-status-icon">{{item.status === 'ok' ? '📄' : '⚠️'}}</view>
           <view class="file-row-info">
             <view class="file-row-name">{{item.name}}</view>
-            <view class="file-row-meta" wx:if="{{item.status === 'ok'}}">
-              <text class="file-ext">.{{item.ext}}</text>
-              <text class="file-size">{{item.sizeText}}</text>
-            </view>
-            <view class="file-row-error" wx:if="{{item.status === 'error'}}">不支持的文件类型</view>
+            <view class="file-row-meta" wx:if="{{item.status === 'ok'}}">.{{item.ext}} · {{item.sizeText}}</view>
+            <view class="file-row-error" wx:if="{{item.status === 'error'}}">{{item.error}}</view>
           </view>
         </view>
-        <view class="file-row-right" bind:tap="removeFile" data-index="{{index}}">
-          ✕
-        </view>
+        <view class="file-row-right" bind:tap="removeFile" data-index="{{index}}">✕</view>
       </view>
-      <!-- 继续添加按钮 -->
-      <view class="add-more" bind:tap="chooseFile">
-        + 添加文件
-      </view>
+      <view class="add-more" bind:tap="chooseFile" wx:if="{{files.length < 5}}">+ 添加文件</view>
     </view>
   </view>
 
-  <!-- 参数配置区 -->
+  <!-- 参数区 -->
   <view class="panel">
     <view class="panel-title">
       <text>运行参数</text>
       <button class="btn btn-primary btn-run" bind:tap="runAnalysis"
-              disabled="{{cannotRun}}">
-        {{isRunning ? '运行中...' : '运行分析'}}
+              disabled="{{!canRun}}" loading="{{isRunning}}">
+        {{isRunning ? '分析中...' : '运行分析'}}
       </button>
     </view>
 
-    <!-- 分析主题 -->
     <view class="form-group">
       <view class="form-label">分析主题 / 场景</view>
-      <input class="form-input" placeholder="例如：RedNote 公开反馈"
+      <input class="form-input" placeholder="例如：RedNote 用户反馈"
              value="{{contextText}}" bindinput="onContextInput" />
     </view>
 
-    <!-- 模型选择 -->
     <view class="form-group">
       <view class="form-label">模型</view>
       <view class="segmented-control">
         <view class="seg-item {{model === 'deepseek-v4-flash' ? 'active' : ''}}"
-              bind:tap="selectModel" data-model="deepseek-v4-flash">
-          Flash (快速)
-        </view>
+              bind:tap="selectModel" data-model="deepseek-v4-flash">Flash 快速</view>
         <view class="seg-item {{model === 'deepseek-v4-pro' ? 'active' : ''}}"
-              bind:tap="selectModel" data-model="deepseek-v4-pro">
-          Pro (高质量)
-        </view>
+              bind:tap="selectModel" data-model="deepseek-v4-pro">Pro 高质量</view>
       </view>
     </view>
 
-    <!-- 仅清洗模式 -->
-    <view class="cleaning-mode" bind:tap="toggleNoLLM">
-      <view class="cleaning-mode-left">
-        <view class="cleaning-mode-title">仅清洗 / 启发式统计（不调用 AI）</view>
-        <view class="cleaning-mode-desc">快速统计不调用 DeepSeek，仅做文本清洗和基础分析</view>
+    <view class="setting-row cleaning-row" bind:tap="toggleNoLLM">
+      <view class="setting-row-left">
+        <view class="setting-row-title">仅清洗 / 启发式统计</view>
+        <view class="setting-row-desc">不调用 DeepSeek，仅做文本清洗和基础统计</view>
       </view>
       <switch checked="{{noLLM}}" color="#2563eb" />
     </view>
   </view>
 
-  <!-- 进度区 -->
+  <!-- 进度面板 -->
   <view class="panel" wx:if="{{isRunning}}">
     <view class="panel-title">
       <text>运行中</text>
-      <text class="progress-pct">{{progress}}%</text>
+      <text class="panel-sub">{{progress}}%</text>
     </view>
     <view class="progress-bar">
-      <view class="progress-bar-fill" style="width: {{progress}}%"></view>
+      <view class="progress-bar-fill" style="width: {{progress}}%;"></view>
     </view>
-    <view class="progress-msg">{{statusMessage}}</view>
+    <view style="font-size:12px; color: var(--color-text-secondary); margin-top: 10px;">
+      {{statusMessage}}
+    </view>
   </view>
 
   <!-- 错误提示 -->
   <view class="panel error-panel" wx:if="{{errorMessage}}">
-    <view class="error-icon">⚠️</view>
+    <view style="font-size: 36px; text-align: center; margin-bottom: 8px;">⚠️</view>
     <view class="error-text">{{errorMessage}}</view>
-    <button class="btn btn-ghost" bind:tap="dismissError" style="margin-top: 8px;">确定</button>
+    <view style="text-align: center; margin-top: 12px;">
+      <button class="btn btn-ghost btn-sm" bind:tap="dismissError">关闭</button>
+    </view>
   </view>
 
-  <!-- 最近完成结果快捷入口 -->
-  <view class="panel" wx:if="{{lastTaskId && !isRunning}}">
+  <!-- 最近结果 -->
+  <view class="panel" wx:if="{{lastTaskId && !isRunning && !errorMessage}}">
     <view class="panel-title">
-      <text>最近结果</text>
-      <navigator url="/pages/result/result?taskId={{lastTaskId}}" class="link-text">
-        查看完整看板 ›
-      </navigator>
+      <text>最近分析结果</text>
+      <navigator url="/pages/result/result?taskId={{lastTaskId}}" class="link-text">查看完整看板 ›</navigator>
     </view>
   </view>
 </view>

@@ -43,6 +43,7 @@
   "libVersion": "3.3.4",
   "appid": "wx_your_appid_here",
   "projectname": "feedback-pipeline-miniprogram",
+  "miniprogramRoot": "miniprogram/",
   "cloudfunctionTemplateRoot": "cloudfunctionTemplate/",
   "condition": {},
   "editorSetting": {

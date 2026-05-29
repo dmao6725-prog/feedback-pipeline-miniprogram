@@ -1,29 +1,36 @@
-// ============================================================
 // result.ts — 结果看板
 // 从 Swift ResultView.swift 迁移
-// ============================================================
 
 import { getTaskResult } from '../../utils/api';
-import { percent, formatYearMonth, sentimentColor, severityColor } from '../../utils/format';
-import { TaskResult, Overview, Topic, TrendPoint, ResultTable } from '../../utils/models';
+import { TaskResult } from '../../utils/models';
+
+const TOPIC_OPTIONS = ['全部', '账号问题', '翻译问题', '审核与内容治理', '隐私与合规',
+  '推荐算法', '产品bug', '性能', '内容生态', '跨文化互动', '广告与商业化', '客服', '其他'];
+const SENTIMENT_OPTIONS = ['全部', '正面', '负面', '中性', '混合'];
+const SEVERITY_OPTIONS = ['全部', '高', '中', '低'];
 
 Page({
   data: {
-    taskId: '',
-    loading: true,
-    error: '',
+    taskId: '' as string,
+    loading: true as boolean,
+    error: '' as string,
     result: null as TaskResult | null,
 
-    // tab
-    activeTab: 'overview',
+    activeTab: 'overview' as string,
 
-    // filters
-    topicFilter: '全部',
-    sentimentFilter: '全部',
-    severityFilter: '全部',
-    meaningfulOnly: false,
+    // filter indices
+    topicIdx: 0 as number,
+    sentimentIdx: 0 as number,
+    severityIdx: 0 as number,
+    meaningfulOnly: false as boolean,
 
-    // expanded sample IDs
+    // filter options
+    topicOptions: TOPIC_OPTIONS as string[],
+    sentimentOptions: SENTIMENT_OPTIONS as string[],
+    severityOptions: SEVERITY_OPTIONS as string[],
+
+    // filtered rows (computed in TS)
+    filteredRows: [] as any[],
     expandedIds: [] as string[],
   },
 
@@ -31,6 +38,7 @@ Page({
     const taskId = options.taskId || '';
     this.setData({ taskId });
     if (taskId) this.loadResult();
+    else this.setData({ loading: false, error: '缺少任务 ID' });
   },
 
   async loadResult() {
@@ -39,63 +47,74 @@ Page({
       const resp = await getTaskResult(this.data.taskId);
       if (resp.result) {
         this.setData({ result: resp.result, loading: false });
+        this.applyFilters();
       } else if (resp.status === 'failed') {
         this.setData({ error: resp.error || '任务处理失败', loading: false });
+      } else if (resp.status) {
+        this.setData({ error: `任务状态: ${resp.status}，请稍后重试`, loading: false });
       } else {
-        this.setData({ error: '任务仍在处理中，请稍后查看', loading: false });
+        this.setData({ error: '任务结果不存在', loading: false });
       }
     } catch (err: any) {
       this.setData({ error: err.message || '加载失败', loading: false });
     }
   },
 
-  // ---- tab 切换 ----
+  // ---- tab ----
   switchTab(e: any) {
     this.setData({ activeTab: e.currentTarget.dataset.tab });
   },
 
   // ---- 筛选 ----
-  onTopicFilter(e: any) {
-    this.setData({ topicFilter: e.detail.value });
+  onTopicChange(e: any) {
+    this.setData({ topicIdx: parseInt(e.detail.value, 10) || 0 });
+    this.applyFilters();
   },
-  onSentimentFilter(e: any) {
-    this.setData({ sentimentFilter: e.detail.value });
+  onSentimentChange(e: any) {
+    this.setData({ sentimentIdx: parseInt(e.detail.value, 10) || 0 });
+    this.applyFilters();
   },
-  onSeverityFilter(e: any) {
-    this.setData({ severityFilter: e.detail.value });
+  onSeverityChange(e: any) {
+    this.setData({ severityIdx: parseInt(e.detail.value, 10) || 0 });
+    this.applyFilters();
   },
   toggleMeaningful() {
     this.setData({ meaningfulOnly: !this.data.meaningfulOnly });
+    this.applyFilters();
   },
 
-  // ---- 展开/收起样本 ----
+  applyFilters() {
+    const { result, topicIdx, sentimentIdx, severityIdx, meaningfulOnly, topicOptions, sentimentOptions, severityOptions } = this.data;
+    if (!result?.tables?.common?.rows) {
+      this.setData({ filteredRows: [] });
+      return;
+    }
+
+    const topicVal = topicOptions[topicIdx] || '全部';
+    const sentimentVal = sentimentOptions[sentimentIdx] || '全部';
+    const severityVal = severityOptions[severityIdx] || '全部';
+
+    const rows = result.tables.common.rows
+      .map((r: any, i: number) => ({ ...r, _idx: i }))
+      .filter((r: any) => {
+        if (topicVal !== '全部' && r['议题分类'] !== topicVal) return false;
+        if (sentimentVal !== '全部' && r['情感倾向'] !== sentimentVal) return false;
+        if (severityVal !== '全部' && r['严重程度'] !== severityVal) return false;
+        if (meaningfulOnly && !r['核心含义'] && !r['可落地性'] && r['核心含义'] !== '—' && r['可落地性'] !== '—') return false;
+        return true;
+      });
+
+    this.setData({ filteredRows: rows });
+  },
+
+  // ---- 展开/收起 ----
   toggleSample(e: any) {
-    const id = e.currentTarget.dataset.id;
+    const id = String(e.currentTarget.dataset.id);
     const expandedIds = [...this.data.expandedIds];
     const idx = expandedIds.indexOf(id);
     if (idx >= 0) expandedIds.splice(idx, 1);
     else expandedIds.push(id);
     this.setData({ expandedIds });
-  },
-
-  // ---- 计算属性（通过 wxml 引用） ----
-  getSamples(): any[] {
-    const { result } = this.data;
-    if (!result) return [];
-    const table = result.tables?.common;
-    if (table?.rows) return table.rows.map((r: any, i: number) => ({ ...r, _idx: i }));
-    return [];
-  },
-
-  getFilteredSamples(): any[] {
-    const { topicFilter, sentimentFilter, severityFilter, meaningfulOnly } = this.data;
-    return this.getSamples().filter((s: any) => {
-      if (topicFilter !== '全部' && s['议题分类'] !== topicFilter) return false;
-      if (sentimentFilter !== '全部' && s['情感倾向'] !== sentimentFilter) return false;
-      if (severityFilter !== '全部' && s['严重程度'] !== severityFilter) return false;
-      if (meaningfulOnly && !s['核心含义'] && !s['可落地性']) return false;
-      return true;
-    });
   },
 
   // ---- 导出 CSV ----
@@ -106,11 +125,11 @@ Page({
       return;
     }
     const table = result.tables.common;
-    const header = table.columns.join(',');
+    const header = table.columns.map((c: string) => `"${c.replace(/"/g, '""')}"`).join(',');
     const rows = table.rows.map((r: any) =>
       table.columns.map((c: string) => `"${String(r[c] || '').replace(/"/g, '""')}"`).join(',')
     );
-    const csv = [header, ...rows].join('\n');
+    const csv = '﻿' + header + '\n' + rows.join('\n');
 
     const fs = wx.getFileSystemManager();
     const filePath = `${wx.env.USER_DATA_PATH}/analysis_result.csv`;
@@ -119,13 +138,10 @@ Page({
       data: csv,
       encoding: 'utf8',
       success: () => {
-        wx.shareFileMessage({
-          filePath,
-          fileName: 'analysis_result.csv',
-        });
+        wx.shareFileMessage({ filePath, fileName: 'analysis_result.csv' });
       },
-      fail: () => {
-        wx.showToast({ title: '导出失败', icon: 'none' });
+      fail: (err: any) => {
+        wx.showToast({ title: '导出失败: ' + (err.errMsg || ''), icon: 'none' });
       },
     });
   },

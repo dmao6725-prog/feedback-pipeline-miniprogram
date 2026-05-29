@@ -1,203 +1,30 @@
-/* run.wxss */
-.upload-zone {
-  border: 2px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 32px 16px;
-  text-align: center;
-  background: var(--color-surface-2);
+/* run.wxss — 分析页专属样式（全局样式见 app.wxss） */
+
+.page-header {
+  margin-bottom: var(--space-lg);
 }
 
-.upload-zone-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.3px;
 }
 
-.upload-zone-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-0);
-  margin-bottom: 4px;
-}
-
-.upload-zone-desc {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.file-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.file-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background: var(--color-surface-2);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-}
-
-.file-row.error {
-  background: #fef2f2;
-  border-color: #fecaca;
-}
-
-.file-row-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-
-.file-status-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.file-row-info {
-  min-width: 0;
-}
-
-.file-row-name {
+.page-desc {
   font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-0);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-row-meta {
-  display: flex;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--color-text-3);
-  margin-top: 2px;
-}
-
-.file-row-error {
-  font-size: 11px;
-  color: var(--color-neg);
-  margin-top: 2px;
-}
-
-.file-row-right {
-  font-size: 13px;
-  color: var(--color-text-3);
-  padding: 4px;
-}
-
-.file-count {
-  font-size: 11px;
-  color: var(--color-text-3);
-}
-
-.add-more {
-  text-align: center;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-brand);
-  padding: 10px;
-  border-radius: var(--radius-md);
-  border: 1px dashed var(--color-brand);
-}
-
-/* 分段控件 */
-.segmented-control {
-  display: flex;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  max-width: 240px;
-}
-
-.seg-item {
-  flex: 1;
-  text-align: center;
-  padding: 8px 12px;
-  font-size: 13px;
-  background: var(--color-surface);
-  color: var(--color-text-2);
-}
-
-.seg-item.active {
-  background: var(--color-brand);
-  color: #fff;
-}
-
-/* 仅清洗模式 */
-.cleaning-mode {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  background: var(--color-surface-2);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-}
-
-.cleaning-mode-left {
-  flex: 1;
-  margin-right: 12px;
-}
-
-.cleaning-mode-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-0);
-}
-
-.cleaning-mode-desc {
-  font-size: 11px;
-  color: var(--color-text-3);
+  color: var(--color-text-tertiary);
   margin-top: 4px;
 }
 
-/* 进度 */
+.cleaning-row {
+  padding: 10px 14px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
 .btn-run {
-  padding: 8px 16px;
-  font-size: 13px;
-}
-
-.progress-pct {
-  font-size: 12px;
-  color: var(--color-text-2);
-}
-
-.progress-msg {
-  font-size: 12px;
-  color: var(--color-text-2);
-  margin-top: 8px;
-}
-
-/* 错误 */
-.error-panel {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-}
-
-.error-icon {
-  font-size: 24px;
-  text-align: center;
-}
-
-.error-text {
-  font-size: 13px;
-  color: var(--color-neg);
-  text-align: center;
-  margin-top: 8px;
-}
-
-/* 快捷入口 */
-.link-text {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-brand);
+  padding: 8px 18px !important;
+  font-size: 13px !important;
 }

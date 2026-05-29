@@ -8,6 +8,190 @@ const TOPIC_OPTIONS = ['全部', '账号问题', '翻译问题', '审核与内�
 const SENTIMENT_OPTIONS = ['全部', '正面', '负面', '中性', '混合'];
 const SEVERITY_OPTIONS = ['全部', '高', '中', '低'];
 
+function hasValue(value) {
+  return value !== null && value !== undefined && value !== '';
+}
+
+function formatNumber(value, fallback = '0') {
+  if (!hasValue(value)) return fallback;
+  const n = Number(value);
+  return Number.isFinite(n) ? String(n) : fallback;
+}
+
+function formatPercent(value, digits = 0) {
+  if (!hasValue(value)) return '';
+  const n = Number(value);
+  return Number.isFinite(n) ? `${(n * 100).toFixed(digits)}%` : '';
+}
+
+function formatRating(value) {
+  if (!hasValue(value)) return '';
+  const n = Number(value);
+  return Number.isFinite(n) ? n.toFixed(2) : '';
+}
+
+function topicBarColor(negativeRate) {
+  const n = Number(negativeRate);
+  if (!Number.isFinite(n)) return '#2563eb';
+  if (n >= 0.5) return '#ef4444';
+  if (n >= 0.25) return '#f59e0b';
+  return '#2563eb';
+}
+
+function sentimentColor(sentiment) {
+  switch (sentiment) {
+    case '正面': return '#10b981';
+    case '负面': return '#ef4444';
+    case '中性': return '#9ca3af';
+    case '混合': return '#f59e0b';
+    default: return '#6b7280';
+  }
+}
+
+function getField(row, keys, fallback = '') {
+  for (const key of keys) {
+    if (hasValue(row[key])) return row[key];
+  }
+  return fallback;
+}
+
+function meaningfulText(value) {
+  return hasValue(value) && value !== '—';
+}
+
+function normalizeResultRow(row, index, expandedIds) {
+  const rowId = `s-${index}`;
+  const product = getField(row, ['产品']);
+  const topicText = getField(row, ['议题分类']);
+  const sentimentText = getField(row, ['情感倾向']);
+  const severityText = getField(row, ['严重程度']);
+  const coreMeaningText = getField(row, ['核心含义']);
+  const userIntentText = getField(row, ['用户意图']);
+  const actionabilityText = getField(row, ['可落地性']);
+  const evidenceText = getField(row, ['证据原文']);
+  const platformText = getField(row, ['平台'], '本地文件');
+  const sourceFileText = getField(row, ['来源文件']);
+  const isExpanded = expandedIds.indexOf(rowId) >= 0;
+
+  return Object.assign({}, row, {
+    _idx: index,
+    rowId,
+    sampleTitle: product || `样本 ${index + 1}`,
+    summaryText: getField(row, ['摘要文本', '核心含义', '证据原文']),
+    topicText,
+    hasTopic: meaningfulText(topicText),
+    sentimentText,
+    isPositive: sentimentText === '正面',
+    isNegative: sentimentText === '负面',
+    isMixed: sentimentText === '混合',
+    isNeutral: sentimentText === '中性',
+    severityText,
+    isSevere: severityText === '高',
+    hasCoreMeaning: meaningfulText(coreMeaningText),
+    coreMeaningText,
+    hasUserIntent: meaningfulText(userIntentText),
+    userIntentText,
+    hasActionability: meaningfulText(actionabilityText),
+    actionabilityText,
+    hasEvidence: meaningfulText(evidenceText),
+    evidenceText,
+    sourceText: sourceFileText ? `${platformText} · ${sourceFileText}` : platformText,
+    isExpanded,
+    expandText: isExpanded ? '收起 ▲' : '展开 ▼',
+  });
+}
+
+function getCommonRows(result) {
+  if (!result || !result.tables || !result.tables.common || !result.tables.common.rows) {
+    return [];
+  }
+  return result.tables.common.rows;
+}
+
+function normalizeRows(rows, expandedIds) {
+  return (rows || []).map((row, index) => normalizeResultRow(row, index, expandedIds || []));
+}
+
+function normalizeResult(result, expandedIds) {
+  const overview = result.overview || {};
+  const meta = result.meta || {};
+  const summaries = result.summaries || {};
+  const total = Number(overview.total || 0);
+  const commonRows = getCommonRows(result);
+
+  const topics = result.topics || [];
+  const maxTopicCount = Math.max(1, ...topics.map((item) => Number(item.count || 0)));
+  const topicsView = topics.slice(0, 10).map((item) => ({
+    topic: item.topic,
+    countText: formatNumber(item.count),
+    shareText: formatPercent(item.share, 0),
+    widthText: `${Math.round((Number(item.count || 0) / maxTopicCount) * 100)}%`,
+    barColor: topicBarColor(item.negative_rate),
+  }));
+
+  const sentimentCounts = overview.sentiment_counts || {};
+  const sentimentBarsView = ['正面', '负面', '中性', '混合']
+    .filter((name) => Number(sentimentCounts[name] || 0) > 0)
+    .map((name) => {
+      const count = Number(sentimentCounts[name] || 0);
+      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      return {
+        name,
+        color: sentimentColor(name),
+        countText: String(count),
+        widthText: `${pct}%`,
+      };
+    });
+
+  const trend = result.trend || [];
+  const maxTrendCount = Math.max(1, ...trend.map((item) => Number(item.count || 0)));
+  const trendView = trend.map((item) => ({
+    yearMonth: item.year_month,
+    countText: formatNumber(item.count),
+    widthText: `${Math.round((Number(item.count || 0) / maxTrendCount) * 100)}%`,
+    hasNegativeRate: hasValue(item.negative_rate),
+    negativeRateText: formatPercent(item.negative_rate, 0),
+  }));
+
+  const negativeRateText = formatPercent(overview.negative_rate, 1);
+  const highSeverityRateText = formatPercent(overview.high_severity_rate, 1);
+  const avgRatingText = formatRating(overview.play_avg_rating);
+
+  return Object.assign({}, result, {
+    meta: Object.assign({}, meta, {
+      platforms: meta.platforms || [],
+    }),
+    overviewView: {
+      totalText: formatNumber(overview.total),
+      hasNegativeRate: !!negativeRateText,
+      negativeRateText,
+      hasNegativeCount: hasValue(overview.negative_count),
+      negativeCountText: `共 ${formatNumber(overview.negative_count)} 条`,
+      hasHighSeverityRate: !!highSeverityRateText,
+      highSeverityRateText,
+      hasHighSeverityCount: hasValue(overview.high_severity_count),
+      highSeverityCountText: `共 ${formatNumber(overview.high_severity_count)} 条`,
+      hasAvgRating: !!avgRatingText,
+      avgRatingText,
+    },
+    executiveSummaryText: summaries.executive_summary || '',
+    topicSummaryText: summaries.topic || '',
+    hasExecutiveSummary: !!summaries.executive_summary,
+    hasTopicSummary: !!summaries.topic,
+    hasPlatforms: !!(meta.platforms && meta.platforms.length),
+    hasTopics: topicsView.length > 0,
+    topicCountText: `${topics.length} 个议题`,
+    topicsView,
+    hasSentiments: sentimentBarsView.length > 0,
+    sentimentBarsView,
+    hasTrend: trendView.length > 0,
+    trendCountText: `${trend.length} 个月`,
+    trendView,
+    hasRows: commonRows.length > 0,
+    sampleRows: normalizeRows(commonRows.slice(0, 3), []),
+  });
+}
+
 Page({
   data: {
     taskId: '',
@@ -25,6 +209,9 @@ Page({
     topicOptions: TOPIC_OPTIONS,
     sentimentOptions: SENTIMENT_OPTIONS,
     severityOptions: SEVERITY_OPTIONS,
+    selectedTopicText: '全部',
+    selectedSentimentText: '全部',
+    selectedSeverityText: '全部',
 
     filteredRows: [],
     expandedIds: [],
@@ -42,8 +229,9 @@ Page({
     try {
       const resp = await getTaskResult(this.data.taskId);
       if (resp.result) {
-        this.setData({ result: resp.result, loading: false });
-        this.applyFilters();
+        const result = normalizeResult(resp.result, this.data.expandedIds);
+        this.setData({ result, loading: false });
+        this.applyFilters(result);
       } else if (resp.status === 'failed') {
         this.setData({ error: resp.error || '任务处理失败', loading: false });
       } else if (resp.status) {
@@ -63,53 +251,69 @@ Page({
 
   // ---- 筛选 ----
   onTopicChange(e) {
-    this.setData({ topicIdx: parseInt(e.detail.value, 10) || 0 });
-    this.applyFilters();
-  },
-  onSentimentChange(e) {
-    this.setData({ sentimentIdx: parseInt(e.detail.value, 10) || 0 });
-    this.applyFilters();
-  },
-  onSeverityChange(e) {
-    this.setData({ severityIdx: parseInt(e.detail.value, 10) || 0 });
-    this.applyFilters();
-  },
-  toggleMeaningful() {
-    this.setData({ meaningfulOnly: !this.data.meaningfulOnly });
-    this.applyFilters();
+    const topicIdx = parseInt(e.detail.value, 10) || 0;
+    this.setData({
+      topicIdx,
+      selectedTopicText: this.data.topicOptions[topicIdx] || '全部',
+    });
+    this.applyFilters(null, null, { topicIdx });
   },
 
-  applyFilters() {
-    const {
-      result,
-      topicIdx,
+  onSentimentChange(e) {
+    const sentimentIdx = parseInt(e.detail.value, 10) || 0;
+    this.setData({
       sentimentIdx,
+      selectedSentimentText: this.data.sentimentOptions[sentimentIdx] || '全部',
+    });
+    this.applyFilters(null, null, { sentimentIdx });
+  },
+
+  onSeverityChange(e) {
+    const severityIdx = parseInt(e.detail.value, 10) || 0;
+    this.setData({
       severityIdx,
-      meaningfulOnly,
-      topicOptions,
-      sentimentOptions,
-      severityOptions,
-    } = this.data;
-    if (!result || !result.tables || !result.tables.common || !result.tables.common.rows) {
+      selectedSeverityText: this.data.severityOptions[severityIdx] || '全部',
+    });
+    this.applyFilters(null, null, { severityIdx });
+  },
+
+  toggleMeaningful() {
+    const meaningfulOnly = !this.data.meaningfulOnly;
+    this.setData({ meaningfulOnly });
+    this.applyFilters(null, null, { meaningfulOnly });
+  },
+
+  applyFilters(resultOverride, expandedIdsOverride, filterOverride) {
+    const state = Object.assign({}, this.data, filterOverride || {});
+    const result = resultOverride || state.result;
+    const expandedIds = expandedIdsOverride || state.expandedIds;
+
+    if (!result) {
       this.setData({ filteredRows: [] });
       return;
     }
 
-    const topicVal = topicOptions[topicIdx] || '全部';
-    const sentimentVal = sentimentOptions[sentimentIdx] || '全部';
-    const severityVal = severityOptions[severityIdx] || '全部';
+    const rows = getCommonRows(result);
+    if (!rows.length) {
+      this.setData({ filteredRows: [] });
+      return;
+    }
 
-    const rows = result.tables.common.rows
-      .map((r, i) => Object.assign({}, r, { _idx: i }))
-      .filter((r) => {
-        if (topicVal !== '全部' && r['议题分类'] !== topicVal) return false;
-        if (sentimentVal !== '全部' && r['情感倾向'] !== sentimentVal) return false;
-        if (severityVal !== '全部' && r['严重程度'] !== severityVal) return false;
-        if (meaningfulOnly && !r['核心含义'] && !r['可落地性'] && r['核心含义'] !== '—' && r['可落地性'] !== '—') return false;
+    const topicVal = state.topicOptions[state.topicIdx] || '全部';
+    const sentimentVal = state.sentimentOptions[state.sentimentIdx] || '全部';
+    const severityVal = state.severityOptions[state.severityIdx] || '全部';
+
+    const filteredRows = rows
+      .map((row, index) => normalizeResultRow(row, index, expandedIds))
+      .filter((row) => {
+        if (topicVal !== '全部' && row.topicText !== topicVal) return false;
+        if (sentimentVal !== '全部' && row.sentimentText !== sentimentVal) return false;
+        if (severityVal !== '全部' && row.severityText !== severityVal) return false;
+        if (state.meaningfulOnly && !row.hasCoreMeaning && !row.hasActionability) return false;
         return true;
       });
 
-    this.setData({ filteredRows: rows });
+    this.setData({ filteredRows });
   },
 
   // ---- 展开/收起 ----
@@ -120,6 +324,7 @@ Page({
     if (idx >= 0) expandedIds.splice(idx, 1);
     else expandedIds.push(id);
     this.setData({ expandedIds });
+    this.applyFilters(null, expandedIds);
   },
 
   // ---- 导出 CSV ----

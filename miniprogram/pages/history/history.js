@@ -3,6 +3,42 @@
 
 const { getLocalHistoryList, setLocalHistoryList } = require('../../utils/storage');
 
+function hasValue(value) {
+  return value !== null && value !== undefined && value !== '';
+}
+
+function formatPercent(value) {
+  if (!hasValue(value)) return '';
+  const n = Number(value);
+  return Number.isFinite(n) ? `${Math.round(n * 100)}%` : '';
+}
+
+function normalizeHistoryItem(item) {
+  const summary = item.resultSummary || {};
+  const status = item.status || 'failed';
+  const isCompleted = status === 'completed';
+  const negativeRateText = formatPercent(summary.negative_rate);
+
+  return Object.assign({}, item, {
+    statusClass: status,
+    statusChipClass: isCompleted ? 'chip-pos' : 'chip-neg',
+    statusText: isCompleted ? '已完成' : '失败',
+    createdAtText: item.createdAt || '',
+    hasSummary: !!item.resultSummary,
+    hasSampleCount: hasValue(summary.total),
+    sampleCountText: hasValue(summary.total) ? `${summary.total} 条` : '',
+    hasLlmStatus: hasValue(summary.llm_enabled),
+    llmStatusText: summary.llm_enabled ? 'AI 标注' : '仅清洗',
+    hasNegativeRate: !!negativeRateText,
+    negativeRateText,
+    canView: isCompleted,
+  });
+}
+
+function normalizeHistoryList(list) {
+  return (list || []).map(normalizeHistoryItem);
+}
+
 Page({
   data: {
     historyList: [],
@@ -16,7 +52,7 @@ Page({
   loadHistory() {
     const list = getLocalHistoryList();
     this.setData({
-      historyList: list,
+      historyList: normalizeHistoryList(list),
       loading: false,
     });
   },
@@ -40,7 +76,7 @@ Page({
         if (res.confirm) {
           const list = getLocalHistoryList().filter((h) => h.taskId !== taskId);
           setLocalHistoryList(list);
-          this.setData({ historyList: list });
+          this.setData({ historyList: normalizeHistoryList(list) });
           wx.showToast({ title: '已删除', icon: 'success' });
         }
       },

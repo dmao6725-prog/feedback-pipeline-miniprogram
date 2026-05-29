@@ -30,26 +30,26 @@
     <view class="kpi-grid">
       <view class="kpi-card">
         <view class="kpi-label">样本总数</view>
-        <view class="kpi-value" style="color:#2563eb;">{{result.overview.total}}</view>
+        <view class="kpi-value" style="color:#2563eb;">{{result.overviewView.totalText}}</view>
       </view>
-      <view class="kpi-card" wx:if="{{result.overview.negative_rate !== null}}">
+      <view class="kpi-card" wx:if="{{result.overviewView.hasNegativeRate}}">
         <view class="kpi-label">负面率</view>
-        <view class="kpi-value" style="color:#ef4444;">{{(result.overview.negative_rate * 100).toFixed(1)}}%</view>
-        <view class="kpi-sub" wx:if="{{result.overview.negative_count}}">共 {{result.overview.negative_count}} 条</view>
+        <view class="kpi-value" style="color:#ef4444;">{{result.overviewView.negativeRateText}}</view>
+        <view class="kpi-sub" wx:if="{{result.overviewView.hasNegativeCount}}">{{result.overviewView.negativeCountText}}</view>
       </view>
-      <view class="kpi-card" wx:if="{{result.overview.high_severity_rate !== null}}">
+      <view class="kpi-card" wx:if="{{result.overviewView.hasHighSeverityRate}}">
         <view class="kpi-label">高严重度</view>
-        <view class="kpi-value" style="color:#f59e0b;">{{(result.overview.high_severity_rate * 100).toFixed(1)}}%</view>
-        <view class="kpi-sub" wx:if="{{result.overview.high_severity_count}}">共 {{result.overview.high_severity_count}} 条</view>
+        <view class="kpi-value" style="color:#f59e0b;">{{result.overviewView.highSeverityRateText}}</view>
+        <view class="kpi-sub" wx:if="{{result.overviewView.hasHighSeverityCount}}">{{result.overviewView.highSeverityCountText}}</view>
       </view>
-      <view class="kpi-card" wx:if="{{result.overview.play_avg_rating !== null}}">
+      <view class="kpi-card" wx:if="{{result.overviewView.hasAvgRating}}">
         <view class="kpi-label">Play 平均分</view>
-        <view class="kpi-value" style="color:#6366f1;">{{result.overview.play_avg_rating.toFixed(2)}}</view>
+        <view class="kpi-value" style="color:#6366f1;">{{result.overviewView.avgRatingText}}</view>
       </view>
     </view>
 
     <!-- 数据来源 -->
-    <view class="panel" wx:if="{{result.meta.platforms.length}}">
+    <view class="panel" wx:if="{{result.hasPlatforms}}">
       <view class="panel-title"><text>数据来源</text></view>
       <view class="source-list">
         <block wx:for="{{result.meta.platforms}}" wx:key="code">
@@ -62,95 +62,95 @@
     </view>
 
     <!-- 决策摘要 -->
-    <view class="panel" wx:if="{{result.summaries.executive_summary}}">
+    <view class="panel" wx:if="{{result.hasExecutiveSummary}}">
       <view class="panel-title">
         <text>决策摘要</text>
         <text class="chip chip-accent">AI</text>
       </view>
       <view style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">
-        {{result.summaries.executive_summary}}
+        {{result.executiveSummaryText}}
       </view>
     </view>
 
     <!-- 议题分布 -->
-    <view class="panel" wx:if="{{result.topics.length}}">
+    <view class="panel" wx:if="{{result.hasTopics}}">
       <view class="panel-title">
         <text>议题分布</text>
-        <text class="panel-sub">{{result.topics.length}} 个议题</text>
+        <text class="panel-sub">{{result.topicCountText}}</text>
       </view>
       <view class="topic-list">
-        <block wx:for="{{result.topics}}" wx:key="topic" wx:for-index="idx">
-          <view class="topic-row" wx:if="{{idx < 10}}">
+        <block wx:for="{{result.topicsView}}" wx:key="topic">
+          <view class="topic-row">
             <view class="topic-name">{{item.topic}}</view>
             <view class="topic-bar-wrap">
-              <view class="topic-bar" style="width:{{(item.count / result.topics[0].count * 100).toFixed(0)}}%; background:{{item.negative_rate >= 0.5 ? '#ef4444' : item.negative_rate >= 0.25 ? '#f59e0b' : '#2563eb'}};"></view>
+              <view class="topic-bar" style="width:{{item.widthText}}; background:{{item.barColor}};"></view>
             </view>
-            <view class="topic-counts">{{item.count}} · {{(item.share * 100).toFixed(0)}}%</view>
+            <view class="topic-counts">{{item.countText}} · {{item.shareText}}</view>
           </view>
         </block>
       </view>
-      <view wx:if="{{result.summaries.topic}}" style="font-size:12px;color:var(--color-text-tertiary);margin-top:10px;">{{result.summaries.topic}}</view>
+      <view wx:if="{{result.hasTopicSummary}}" style="font-size:12px;color:var(--color-text-tertiary);margin-top:10px;">{{result.topicSummaryText}}</view>
     </view>
 
     <!-- 情感分布 -->
-    <view class="panel" wx:if="{{result.overview.sentiment_counts}}">
+    <view class="panel" wx:if="{{result.hasSentiments}}">
       <view class="panel-title">情感分布</view>
       <view class="bar-list">
-        <block wx:for="{{['正面','负面','中性','混合']}}" wx:key="*this" wx:for-item="s">
-          <view class="bar-item" wx:if="{{result.overview.sentiment_counts[s]}}">
-            <view class="bar-label" style="color:{{s === '正面' ? '#10b981' : s === '负面' ? '#ef4444' : s === '中性' ? '#9ca3af' : '#f59e0b'}};">{{s}}</view>
+        <block wx:for="{{result.sentimentBarsView}}" wx:key="name">
+          <view class="bar-item">
+            <view class="bar-label" style="color:{{item.color}};">{{item.name}}</view>
             <view class="bar-wrap">
-              <view class="bar-fill" style="width:{{(result.overview.sentiment_counts[s] / result.overview.total * 100).toFixed(0)}}%; background:{{s === '正面' ? '#10b981' : s === '负面' ? '#ef4444' : s === '中性' ? '#9ca3af' : '#f59e0b'}};"></view>
+              <view class="bar-fill" style="width:{{item.widthText}}; background:{{item.color}};"></view>
             </view>
-            <view class="bar-count">{{result.overview.sentiment_counts[s]}}</view>
+            <view class="bar-count">{{item.countText}}</view>
           </view>
         </block>
       </view>
     </view>
 
     <!-- 月度趋势 -->
-    <view class="panel" wx:if="{{result.trend.length}}">
+    <view class="panel" wx:if="{{result.hasTrend}}">
       <view class="panel-title">
         <text>月度趋势</text>
-        <text class="panel-sub">{{result.trend.length}} 个月</text>
+        <text class="panel-sub">{{result.trendCountText}}</text>
       </view>
       <view class="trend-list">
-        <block wx:for="{{result.trend}}" wx:key="year_month">
+        <block wx:for="{{result.trendView}}" wx:key="yearMonth">
           <view class="trend-row">
-            <view class="trend-month">{{item.year_month}}</view>
+            <view class="trend-month">{{item.yearMonth}}</view>
             <view class="trend-count-wrap">
-              <view class="trend-bar" style="width:{{(item.count / result.trend[0].count * 100).toFixed(0)}}%;"></view>
+              <view class="trend-bar" style="width:{{item.widthText}};"></view>
             </view>
-            <view class="trend-counts">{{item.count}}<text wx:if="{{item.negative_rate !== null}}"> · 负面 {{(item.negative_rate * 100).toFixed(0)}}%</text></view>
+            <view class="trend-counts">{{item.countText}}<text wx:if="{{item.hasNegativeRate}}"> · 负面 {{item.negativeRateText}}</text></view>
           </view>
         </block>
       </view>
     </view>
 
-    <!-- 代表性样本 (3) -->
-    <view class="panel" wx:if="{{result.tables.common.rows.length}}">
+    <!-- 代表性样本 -->
+    <view class="panel" wx:if="{{result.hasRows}}">
       <view class="panel-title">
         <text>代表性样本</text>
         <text class="link-text" bind:tap="switchTab" data-tab="samples">查看全部 ›</text>
       </view>
-      <block wx:for="{{result.tables.common.rows}}" wx:key="_idx" wx:for-index="idx">
-        <view class="sample-card" wx:if="{{idx < 3}}">
+      <block wx:for="{{result.sampleRows}}" wx:key="rowId">
+        <view class="sample-card">
           <view class="sample-header">
-            <view class="sample-title">{{item['产品'] || '样本 ' + (idx + 1)}}</view>
+            <view class="sample-title">{{item.sampleTitle}}</view>
             <view class="sample-chips">
-              <text class="chip chip-info" wx:if="{{item['议题分类'] && item['议题分类'] !== '—'}}">{{item['议题分类']}}</text>
-              <text class="chip chip-pos" wx:if="{{item['情感倾向'] === '正面'}}">{{item['情感倾向']}}</text>
-              <text class="chip chip-neg" wx:if="{{item['情感倾向'] === '负面'}}">{{item['情感倾向']}}</text>
-              <text class="chip chip-warn" wx:if="{{item['情感倾向'] === '混合'}}">{{item['情感倾向']}}</text>
+              <text class="chip chip-info" wx:if="{{item.hasTopic}}">{{item.topicText}}</text>
+              <text class="chip chip-pos" wx:if="{{item.isPositive}}">{{item.sentimentText}}</text>
+              <text class="chip chip-neg" wx:if="{{item.isNegative}}">{{item.sentimentText}}</text>
+              <text class="chip chip-warn" wx:if="{{item.isMixed}}">{{item.sentimentText}}</text>
             </view>
           </view>
-          <view class="sample-summary">{{item['摘要文本'] || item['核心含义'] || ''}}</view>
+          <view class="sample-summary">{{item.summaryText}}</view>
         </view>
       </block>
     </view>
 
     <!-- 导出 -->
-    <view class="export-bar" wx:if="{{result.tables.common.rows.length}}">
+    <view class="export-bar" wx:if="{{result.hasRows}}">
       <button class="btn btn-ghost" bind:tap="exportCSV" style="flex:1;">导出 CSV</button>
     </view>
   </block>
@@ -161,13 +161,13 @@
     <view class="panel">
       <view class="filter-row">
         <picker mode="selector" range="{{topicOptions}}" value="{{topicIdx}}" bindchange="onTopicChange">
-          <view class="filter-btn">议题：{{topicOptions[topicIdx]}} ▼</view>
+          <view class="filter-btn">议题：{{selectedTopicText}} ▼</view>
         </picker>
         <picker mode="selector" range="{{sentimentOptions}}" value="{{sentimentIdx}}" bindchange="onSentimentChange">
-          <view class="filter-btn">情感：{{sentimentOptions[sentimentIdx]}} ▼</view>
+          <view class="filter-btn">情感：{{selectedSentimentText}} ▼</view>
         </picker>
         <picker mode="selector" range="{{severityOptions}}" value="{{severityIdx}}" bindchange="onSeverityChange">
-          <view class="filter-btn">严重：{{severityOptions[severityIdx]}} ▼</view>
+          <view class="filter-btn">严重：{{selectedSeverityText}} ▼</view>
         </picker>
       </view>
       <view class="filter-toggle" bind:tap="toggleMeaningful">
@@ -184,44 +184,44 @@
     </view>
 
     <!-- 样本列表 -->
-    <block wx:for="{{filteredRows}}" wx:key="_idx" wx:for-item="row">
+    <block wx:for="{{filteredRows}}" wx:key="rowId" wx:for-item="row">
       <view class="sample-card">
         <view class="sample-header">
-          <view class="sample-title">{{row['产品'] || '样本 ' + (row._idx + 1)}}</view>
+          <view class="sample-title">{{row.sampleTitle}}</view>
           <view class="sample-chips">
-            <text class="chip chip-info" wx:if="{{row['议题分类'] && row['议题分类'] !== '—'}}">{{row['议题分类']}}</text>
-            <text class="chip chip-pos" wx:if="{{row['情感倾向'] === '正面'}}">{{row['情感倾向']}}</text>
-            <text class="chip chip-neg" wx:if="{{row['情感倾向'] === '负面'}}">{{row['情感倾向']}}</text>
-            <text class="chip chip-warn" wx:if="{{row['情感倾向'] === '混合'}}">{{row['情感倾向']}}</text>
-            <text class="chip chip-neutral" wx:if="{{row['情感倾向'] === '中性'}}">{{row['情感倾向']}}</text>
-            <text class="chip chip-neg" wx:if="{{row['严重程度'] === '高'}}">严重</text>
+            <text class="chip chip-info" wx:if="{{row.hasTopic}}">{{row.topicText}}</text>
+            <text class="chip chip-pos" wx:if="{{row.isPositive}}">{{row.sentimentText}}</text>
+            <text class="chip chip-neg" wx:if="{{row.isNegative}}">{{row.sentimentText}}</text>
+            <text class="chip chip-warn" wx:if="{{row.isMixed}}">{{row.sentimentText}}</text>
+            <text class="chip chip-neutral" wx:if="{{row.isNeutral}}">{{row.sentimentText}}</text>
+            <text class="chip chip-neg" wx:if="{{row.isSevere}}">严重</text>
           </view>
         </view>
-        <view class="sample-summary">{{row['摘要文本'] || row['核心含义'] || row['证据原文'] || ''}}</view>
-        <view class="sample-detail" wx:if="{{expandedIds.indexOf('s-' + row._idx) > -1}}">
-          <view class="detail-field" wx:if="{{row['核心含义'] && row['核心含义'] !== '—'}}">
+        <view class="sample-summary">{{row.summaryText}}</view>
+        <view class="sample-detail" wx:if="{{row.isExpanded}}">
+          <view class="detail-field" wx:if="{{row.hasCoreMeaning}}">
             <view class="detail-label">核心含义</view>
-            <view class="detail-value">{{row['核心含义']}}</view>
+            <view class="detail-value">{{row.coreMeaningText}}</view>
           </view>
-          <view class="detail-field" wx:if="{{row['用户意图'] && row['用户意图'] !== '—'}}">
+          <view class="detail-field" wx:if="{{row.hasUserIntent}}">
             <view class="detail-label">用户意图</view>
-            <view class="detail-value">{{row['用户意图']}}</view>
+            <view class="detail-value">{{row.userIntentText}}</view>
           </view>
-          <view class="detail-field" wx:if="{{row['可落地性'] && row['可落地性'] !== '—'}}">
+          <view class="detail-field" wx:if="{{row.hasActionability}}">
             <view class="detail-label">可落地性</view>
-            <view class="detail-value">{{row['可落地性']}}</view>
+            <view class="detail-value">{{row.actionabilityText}}</view>
           </view>
-          <view class="detail-field" wx:if="{{row['证据原文'] && row['证据原文'] !== '—'}}">
+          <view class="detail-field" wx:if="{{row.hasEvidence}}">
             <view class="detail-label">证据原文</view>
-            <view class="detail-value quote">{{row['证据原文']}}</view>
+            <view class="detail-value quote">{{row.evidenceText}}</view>
           </view>
           <view class="detail-field">
             <view class="detail-label">来源</view>
-            <view class="detail-value">{{row['平台'] || '本地文件'}} · {{row['来源文件'] || ''}}</view>
+            <view class="detail-value">{{row.sourceText}}</view>
           </view>
         </view>
         <view class="sample-footer">
-          <text class="expand-hint" bind:tap="toggleSample" data-id="s-{{row._idx}}">{{expandedIds.indexOf('s-' + row._idx) > -1 ? '收起 ▲' : '展开 ▼'}}</text>
+          <text class="expand-hint" bind:tap="toggleSample" data-id="{{row.rowId}}">{{row.expandText}}</text>
         </view>
       </view>
     </block>

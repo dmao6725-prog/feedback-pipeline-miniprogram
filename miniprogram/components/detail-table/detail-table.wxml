@@ -3,12 +3,12 @@
   <view class="table-wrap">
     <!-- header -->
     <view class="table-header">
-      <view class="table-cell header-cell" wx:for="{{columns}}" wx:key="*this">{{item}}</view>
-    </view>
-    <!-- rows -->
-    <view class="table-row {{item._highlight ? 'highlight' : ''}}" wx:for="{{rows}}" wx:for-item="row" wx:key="_idx" wx:for-index="idx">
-      <view class="table-cell" wx:for="{{columns}}" wx:for-item="col" wx:key="*this">
-        {{row[col] || '—'}}
+    <view class="table-cell header-cell" wx:for="{{columns}}" wx:key="*this">{{item}}</view>
+  </view>
+  <!-- rows -->
+    <view class="table-row {{row.rowClass}}" wx:for="{{viewRows}}" wx:for-item="row" wx:key="rowId">
+      <view class="table-cell" wx:for="{{row.cells}}" wx:for-item="cell" wx:key="key">
+        {{cell.value}}
       </view>
     </view>
   </view>

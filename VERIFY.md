@@ -8,6 +8,14 @@
 - 修复：保留现有 `.ts` 源文件，同时为 `app`、页面、组件和 `utils` 补齐同名 `.js` 运行文件。
 - 验证：`miniprogram/pages/run/run.js`、`result.js`、`history.js`、`settings.js` 已生成，组件 `.json` 均包含 `"component": true`。
 
+## 已修复的微信开发者工具错误
+
+1. WXML 不支持 `.toFixed()` 等 JS 方法调用，已将展示计算迁移到 JS。
+2. 移除对未定义 `SystemError` 的依赖；当前代码中不存在该符号。
+3. 移除对内部字段 `__route__` 的依赖；当前代码中不存在该符号。
+4. 为云函数调用和文件上传增加超时、云开发可用性检查和友好错误提示。
+5. 占位云环境 ID 不再触发启动时云函数调用；请先用 noLLM 模式验证基础流程。
+
 ## 前置条件
 
 - 安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)（macOS/Windows 均可）

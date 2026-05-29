@@ -1,7 +1,7 @@
 // run.js - 分析页：文件选择、参数配置、启动分析、进度跟踪
 // 从 Swift HomeView.swift 迁移
 
-const { submitAnalysis, pollTaskResult } = require('../../utils/api');
+const { submitAnalysis, pollTaskResult, uploadFile } = require('../../utils/api');
 const {
   addLocalHistoryItem,
   getLastRunParams,
@@ -11,6 +11,28 @@ const {
 const { SUPPORTED_EXTENSIONS } = require('../../utils/models');
 
 const MAX_FILE_COUNT = 5;
+
+function getCloudUnavailableMessage() {
+  if (!wx.cloud) {
+    return '云开发不可用，请在微信开发者工具中启用云开发。';
+  }
+
+  const app = typeof getApp === 'function' ? getApp() : null;
+  const globalData = app && app.globalData ? app.globalData : {};
+  if (!globalData.cloudReady) {
+    return '请先在 miniprogram/app.js 中配置真实云环境 ID，并确认云函数已部署。';
+  }
+
+  return '';
+}
+
+function showAnalysisError(message) {
+  wx.showModal({
+    title: '分析失败',
+    content: message,
+    showCancel: false,
+  });
+}
 
 Page({
   data: {
@@ -119,6 +141,12 @@ Page({
 
   // ---- 运行分析 ----
   async runAnalysis() {
+    const cloudMessage = getCloudUnavailableMessage();
+    if (cloudMessage) {
+      showAnalysisError(cloudMessage);
+      return;
+    }
+
     const { files, model, contextText, noLLM } = this.data;
     const okFiles = files.filter((f) => f.status === 'ok');
     if (!okFiles.length) {
@@ -136,27 +164,21 @@ Page({
     });
     this.refreshState();
 
+    let taskId = '';
     try {
       const cloudPath = `uploads/${Date.now()}_${okFiles[0].name}`;
       this.setData({ statusMessage: `上传中: ${okFiles[0].name}` });
 
-      const uploadRes = await new Promise((resolve, reject) => {
-        wx.cloud.uploadFile({
-          cloudPath,
-          filePath: okFiles[0].path,
-          success: resolve,
-          fail: reject,
-        });
-      });
-      const fileID = uploadRes.fileID;
+      const fileID = await uploadFile(okFiles[0].path, cloudPath);
 
       this.setData({ progress: 10, statusMessage: '任务已提交，等待云函数处理...' });
-      const { taskId } = await submitAnalysis({
+      const submitResult = await submitAnalysis({
         fileID,
         model,
         analysisContext: contextText,
         noLLM,
       });
+      taskId = submitResult.taskId;
 
       this.setData({ lastTaskId: taskId });
 
@@ -195,7 +217,7 @@ Page({
     } catch (err) {
       const msg = err && err.message ? err.message : '分析失败，请检查网络或参数后重试';
       addLocalHistoryItem({
-        taskId: `failed_${Date.now()}`,
+        taskId: taskId || `failed_${Date.now()}`,
         status: 'failed',
         createdAt: new Date().toISOString(),
         error: msg,
@@ -206,6 +228,7 @@ Page({
         statusMessage: '',
       });
       this.refreshState();
+      showAnalysisError(msg);
     }
   },
 });

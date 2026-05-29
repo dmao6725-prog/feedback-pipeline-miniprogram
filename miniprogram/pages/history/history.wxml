@@ -20,25 +20,23 @@
       <button class="btn btn-danger btn-sm" bind:tap="clearAll">清空全部</button>
     </view>
 
-    <view class="history-item {{item.status}}" wx:for="{{historyList}}" wx:key="taskId"
+    <view class="history-item {{item.statusClass}}" wx:for="{{historyList}}" wx:key="taskId"
           bind:tap="viewDetail" data-task-id="{{item.taskId}}">
       <view class="history-header">
         <view>
-          <text class="chip {{item.status === 'completed' ? 'chip-pos' : 'chip-neg'}}">
-            {{item.status === 'completed' ? '已完成' : '失败'}}
-          </text>
+          <text class="chip {{item.statusChipClass}}">{{item.statusText}}</text>
         </view>
-        <text class="history-time">{{item.createdAt}}</text>
+        <text class="history-time">{{item.createdAtText}}</text>
       </view>
 
-      <view class="history-body" wx:if="{{item.resultSummary}}">
+      <view class="history-body" wx:if="{{item.hasSummary}}">
         <view class="history-stats">
-          <text wx:if="{{item.resultSummary.total !== null}}" style="font-size:12px;color:var(--color-text-secondary);">
-            {{item.resultSummary.total}} 条
+          <text wx:if="{{item.hasSampleCount}}" style="font-size:12px;color:var(--color-text-secondary);">
+            {{item.sampleCountText}}
           </text>
-          <text class="chip chip-accent" wx:if="{{item.resultSummary.llm_enabled}}">AI 标注</text>
-          <text class="chip chip-neg" wx:if="{{item.resultSummary.negative_rate !== null}}">
-            负面 {{(item.resultSummary.negative_rate * 100).toFixed(0)}}%
+          <text class="chip chip-accent" wx:if="{{item.hasLlmStatus}}">{{item.llmStatusText}}</text>
+          <text class="chip chip-neg" wx:if="{{item.hasNegativeRate}}">
+            负面 {{item.negativeRateText}}
           </text>
         </view>
       </view>
@@ -46,7 +44,7 @@
       <view class="history-error" wx:if="{{item.error}}">{{item.error}}</view>
 
       <view class="history-footer">
-        <text class="link-text" wx:if="{{item.status === 'completed'}}">查看详情 ›</text>
+        <text class="link-text" wx:if="{{item.canView}}">查看详情 ›</text>
         <text class="delete-btn" catch:tap="deleteItem" data-task-id="{{item.taskId}}">删除</text>
       </view>
     </view>

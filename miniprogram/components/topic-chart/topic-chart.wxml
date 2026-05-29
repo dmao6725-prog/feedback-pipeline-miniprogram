@@ -5,15 +5,13 @@
     <text class="panel-sub" wx:if="{{subtitle}}">{{subtitle}}</text>
   </view>
   <view class="topic-list">
-    <block wx:for="{{topics}}" wx:key="topic" wx:for-index="idx">
-      <view class="topic-row" wx:if="{{idx < 10}}">
+    <block wx:for="{{topicsView}}" wx:key="topic">
+      <view class="topic-row">
         <view class="topic-name">{{item.topic}}</view>
         <view class="topic-bar-wrap">
-          <view class="topic-bar"
-                style="width: {{(item.count / maxCount * 100).toFixed(0)}}%; background: {{barColor(item.negative_rate)}};">
-          </view>
+          <view class="topic-bar" style="width: {{item.widthText}}; background: {{item.barColor}};"></view>
         </view>
-        <view class="topic-counts">{{item.count}} · {{(item.share * 100).toFixed(0)}}%</view>
+        <view class="topic-counts">{{item.countText}} · {{item.shareText}}</view>
       </view>
     </block>
   </view>

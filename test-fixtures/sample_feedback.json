@@ -1,0 +1,82 @@
+[
+  {
+    "title": "App keeps crashing on startup",
+    "content": "自从更新到最新版本后，每次打开 App 都会闪退，重启手机也没用。已持续一周。",
+    "rating": 1,
+    "date": "2024-03-15",
+    "platform": "app_store",
+    "engagement": 28
+  },
+  {
+    "title": "Great translation feature",
+    "content": "翻译功能非常好用，翻译质量很高，帮助我读懂了很多外文内容。",
+    "rating": 5,
+    "date": "2024-03-14",
+    "platform": "google_play",
+    "engagement": 45
+  },
+  {
+    "title": "Login verification is broken",
+    "content": "登录时验证码永远收不到，换了手机号也不行。这是严重的账号问题，导致我无法使用。",
+    "rating": 1,
+    "date": "2024-03-13",
+    "platform": "app_store",
+    "engagement": 67
+  },
+  {
+    "title": "Too many ads recently",
+    "content": "最近的广告越来越多，每三个视频就有一个广告，非常影响体验。",
+    "rating": 2,
+    "date": "2024-03-12",
+    "platform": "google_play",
+    "engagement": 89
+  },
+  {
+    "title": "Privacy concern about data collection",
+    "content": "我发现 App 在后台持续收集位置信息，即使在设置中关闭了权限。这让我很担心。",
+    "rating": 1,
+    "date": "2024-03-11",
+    "platform": "app_store",
+    "engagement": 120
+  },
+  {
+    "title": "Love the new recommendation algorithm",
+    "content": "推荐算法真的改善了很多，现在推荐的内容都是我感兴趣的，刷视频停不下来。",
+    "rating": 5,
+    "date": "2024-03-10",
+    "platform": "google_play",
+    "engagement": 56
+  },
+  {
+    "title": "Payment issue - double charged",
+    "content": "我被重复扣款了，同一笔订阅被收了两次钱，找不到退款入口。",
+    "rating": 1,
+    "date": "2024-03-09",
+    "platform": "app_store",
+    "engagement": 95
+  },
+  {
+    "title": "Account banned for no reason",
+    "content": "我的账号被无故封禁，没有任何违规操作，申诉了好几次都没人回复。",
+    "rating": 1,
+    "date": "2024-03-07",
+    "platform": "reddit",
+    "engagement": 200
+  },
+  {
+    "title": "Good but battery drain is real",
+    "content": "App 功能很好，但是耗电太严重了，用半小时掉 40% 的电。",
+    "rating": 3,
+    "date": "2024-03-08",
+    "platform": "google_play",
+    "engagement": 72
+  },
+  {
+    "title": "Translation quality varies by language",
+    "content": "中英文翻译很好，但小语种翻译质量不稳定，有时候完全看不懂。",
+    "rating": 3,
+    "date": "2024-03-06",
+    "platform": "google_play",
+    "engagement": 34
+  }
+]

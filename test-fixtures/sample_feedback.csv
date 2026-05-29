@@ -1,0 +1,11 @@
+title,content,rating,date,platform,engagement
+"App keeps crashing on startup","自从更新到最新版本后，每次打开 App 都会闪退，重启手机也没用。已持续一周。",1,2024-03-15,app_store,28
+"Great translation feature","翻译功能非常好用，翻译质量很高，帮助我读懂了很多外文内容。",5,2024-03-14,google_play,45
+"Login verification is broken","登录时验证码永远收不到，换了手机号也不行。这是严重的账号问题，导致我无法使用。",1,2024-03-13,app_store,67
+"Too many ads recently","最近的广告越来越多，每三个视频就有一个广告，非常影响体验。",2,2024-03-12,google_play,89
+"Privacy concern about data collection","我发现 App 在后台持续收集位置信息，即使在设置中关闭了权限。这让我很担心。",1,2024-03-11,app_store,120
+"Love the new recommendation algorithm","推荐算法真的改善了很多，现在推荐的内容都是我感兴趣的，刷视频停不下来。",5,2024-03-10,google_play,56
+"Payment issue - double charged","我被重复扣款了，同一笔订阅被收了两次钱，找不到退款入口。",1,2024-03-09,app_store,95
+"Good but battery drain is real","App 功能很好，但是耗电太严重了，用半小时掉 40% 的电。",3,2024-03-08,google_play,72
+"Account banned for no reason","我的账号被无故封禁，没有任何违规操作，申诉了好几次都没人回复。",1,2024-03-07,reddit,200
+"Translation quality varies by language","中英文翻译很好，但小语种翻译质量不稳定，有时候完全看不懂。",3,2024-03-06,google_play,34

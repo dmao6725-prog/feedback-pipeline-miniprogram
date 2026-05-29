@@ -30,15 +30,18 @@ exports.main = async (event, context) => {
 
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID || 'anonymous';
+  const taskCollection = db.collection('analysis_tasks');
 
   // 1. 参数校验
   if (!fileID) {
     return errorResponse('缺少参数 fileID');
   }
 
+  await ensureCollection('analysis_tasks');
+
   // 2. 创建任务记录
   const taskId = `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  await db.collection('analysis_tasks').add({
+  await taskCollection.add({
     data: {
       _id: taskId,
       openid,
@@ -50,10 +53,8 @@ exports.main = async (event, context) => {
       updatedAt: db.serverDate(),
       progress: { label_done: 0, label_total: 0, last_message: '开始解析...' },
       error: '',
-      result: null,
+      result: {},
     },
-  }).catch(() => {
-    // collection 不存在时，云开发会自动创建
   });
 
   // 进度上报阈值跟踪（需要在此作用域声明）
@@ -123,7 +124,7 @@ exports.main = async (event, context) => {
     );
 
     // 6. 保存结果
-    await db.collection('analysis_tasks').doc(taskId).update({
+    await taskCollection.doc(taskId).update({
       data: {
         status: 'completed',
         updatedAt: db.serverDate(),
@@ -147,7 +148,7 @@ exports.main = async (event, context) => {
   } catch (err) {
     console.error('[analyzeFeedback] Error:', err);
 
-    await db.collection('analysis_tasks').doc(taskId).update({
+    await taskCollection.doc(taskId).update({
       data: {
         status: 'failed',
         updatedAt: db.serverDate(),
@@ -188,6 +189,17 @@ async function updateStatus(taskId, status, fraction, message) {
       },
     });
   } catch (_) { /* 非致命错误，忽略 */ }
+}
+
+async function ensureCollection(name) {
+  try {
+    await db.createCollection(name);
+  } catch (err) {
+    const message = err && (err.message || err.errMsg || String(err));
+    if (!message || !/exist|already|duplicate|collection|集合|已存在/i.test(message)) {
+      throw err;
+    }
+  }
 }
 
 function successResponse(data) {

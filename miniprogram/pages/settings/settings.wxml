@@ -76,7 +76,7 @@
     <view class="setting-row">
       <view class="setting-row-left">
         <view class="setting-row-title">环境配置</view>
-        <view class="setting-row-desc">在 app.ts 中修改 CLOUD_ENV_ID</view>
+        <view class="setting-row-desc">在 app.js 中修改 CLOUD_ENV_ID</view>
       </view>
     </view>
   </view>

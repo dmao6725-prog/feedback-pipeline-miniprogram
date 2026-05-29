@@ -2,6 +2,12 @@
 
 在微信开发者工具中按以下步骤逐步验证项目可正常编译运行。
 
+## 本次启动修复记录
+
+- 原因：微信开发者工具按 `miniprogram/app.json` 查找页面运行文件时，需要 `pages/run/run.js`，但项目只有 `.ts` 源文件。
+- 修复：保留现有 `.ts` 源文件，同时为 `app`、页面、组件和 `utils` 补齐同名 `.js` 运行文件。
+- 验证：`miniprogram/pages/run/run.js`、`result.js`、`history.js`、`settings.js` 已生成，组件 `.json` 均包含 `"component": true`。
+
 ## 前置条件
 
 - 安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)（macOS/Windows 均可）
@@ -37,8 +43,8 @@
 1. 点击工具栏 **「云开发」** 图标
 2. 开通云开发（如未开通），选择基础版
 3. 记下 **环境 ID**（格式如 `cloud1-xxxxx`）
-4. 在项目中修改 `miniprogram/app.ts` 第 3 行：
-   ```typescript
+4. 在项目中修改 `miniprogram/app.js` 第 3 行：
+   ```javascript
    const CLOUD_ENV_ID = 'your-env-id'; // 替换为真实环境 ID
    ```
 5. 重新编译
